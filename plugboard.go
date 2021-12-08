@@ -5,62 +5,60 @@ import (
 	"strings"
 )
 
-type Plugboard struct {
-	letterMap map[Char]Char
+type plugboard struct {
+	letterMap map[int]int
 }
 
-func (pb *Plugboard) Setup(plugConfig string) error {
-	pairs := strings.Split(plugConfig, " ")
-	if len(pairs) != 10 {
-		return fmt.Errorf("wrong number of plugboard pairs")
+func newPlugboard() plugboard {
+	return plugboard{
+		letterMap: getDefaultLetterMap(),
 	}
+}
 
-	letterMap := make(map[Char]Char, len(Alphabet)) // start with map pointing each letter of the alphabet to itself
-	for _, letter := range Alphabet {
-		letterMap[Char(letter)] = Char(letter)
-	}
+func (pb *plugboard) setup(plugConfig string) error {
+	// start with default map
+	letterMap := getDefaultLetterMap()
 
 	// connect the plugs
+	pairs := strings.Split(plugConfig, " ")
 	for _, pair := range pairs {
-		// check the pair is valid
-		if err := pb.validatePair(pair, letterMap); err != nil {
-			return fmt.Errorf("invalid pair %s: %w", pair, err)
+		// validate the pair
+		if len(pair) != 2 {
+			return fmt.Errorf("invalid pair %s, must be a pair of letters", pair)
 		}
-		// assign to map (temporary map for now, wait for the whole config to finish to make sure there are no errors)
-		letterMap[pair[0]] = pair[1]
-		letterMap[pair[1]] = pair[0]
+		if pair[0] == pair[1] {
+			return fmt.Errorf("invalid pair %s, cannot plug a letter to itself", pair)
+		}
+		var letters [2]int
+		ok := false
+		for i := 0; i < 2; i++ {
+			letters[i], ok = Alphabet.charToInt(char(pair[0]))
+			if !ok {
+				return fmt.Errorf("invalid pair %s, unsupported letter %s", pair, string(pair[0]))
+			}
+			if _, ok = letterMap[letters[i]]; ok {
+				return fmt.Errorf("invalid pair %s, letter %s already connected", pair, string(pair[i]))
+			}
+		}
+
+		// set to map (both directions)
+		letterMap[letters[0]] = letters[1]
+		letterMap[letters[1]] = letters[0]
 	}
 
-	// all good, set the new map
+	// all good, set the new map to plugboard
 	pb.letterMap = letterMap
 	return nil
 }
 
-func (pb *Plugboard) Translate(letter Char) (Char, error) {
-	res, ok := pb.letterMap[letter]
-	if !ok {
-		return 0, fmt.Errorf("letter %s not supported", string(letter))
-	}
-	return res, nil
+func (pb *plugboard) translate(letter int) int {
+	return pb.letterMap[letter]
 }
 
-func (pb *Plugboard) validatePair(pair string, letterMap map[Char]Char) error {
-	if len(pair) != 2 {
-		return fmt.Errorf("must be a pair of letters")
+func getDefaultLetterMap() map[int]int {
+	letterMap := make(map[int]int, Alphabet.getSize())
+	for i := 0; i < Alphabet.getSize(); i++ {
+		letterMap[i] = i
 	}
-	if pair[0] == pair[1] {
-		return fmt.Errorf("cannot plug a letter to itself")
-	}
-	// check there are no duplicate connections
-	for i := 0; i < 2; i++ {
-		mapped, ok := letterMap[pair[i]]
-		if !ok {
-			return fmt.Errorf("letter %s not supported", string(pair[i]))
-		}
-		if mapped != pair[i] {
-			return fmt.Errorf("letter %s already connected to %s", string(pair[i]), string(mapped))
-		}
-	}
-
-	return nil
+	return letterMap
 }
