@@ -1,10 +1,11 @@
-package main
+package enigma
 
 import (
 	"fmt"
 	"strings"
 )
 
+// todo - improve/ expand this so it is clear what happens (now confusing because of implicit rotation)
 type encryptionSequence struct {
 	rotorPositions []int
 	in             int

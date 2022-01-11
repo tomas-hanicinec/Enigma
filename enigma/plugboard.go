@@ -1,4 +1,4 @@
-package main
+package enigma
 
 import (
 	"fmt"
@@ -6,16 +6,22 @@ import (
 )
 
 type plugboard struct {
-	letterMap map[int]int
+	isConfigurable bool
+	letterMap      map[int]int
 }
 
-func newPlugboard() plugboard {
+func newPlugboard(isConfigurable bool) plugboard {
 	return plugboard{
-		letterMap: getDefaultLetterMap(),
+		isConfigurable: isConfigurable,
+		letterMap:      getDefaultLetterMap(),
 	}
 }
 
 func (pb *plugboard) setup(plugConfig string) error {
+	if !pb.isConfigurable {
+		return fmt.Errorf("plugboard is locked, cannot configure")
+	}
+
 	// start with default map
 	letterMap := getDefaultLetterMap()
 
@@ -32,11 +38,11 @@ func (pb *plugboard) setup(plugConfig string) error {
 		var letters [2]int
 		ok := false
 		for i := 0; i < 2; i++ {
-			letters[i], ok = Alphabet.charToInt(char(pair[0]))
+			letters[i], ok = Alphabet.charToInt(pair[i])
 			if !ok {
-				return fmt.Errorf("invalid pair %s, unsupported letter %s", pair, string(pair[0]))
+				return fmt.Errorf("invalid pair %s, unsupported letter %s", pair, string(pair[i]))
 			}
-			if _, ok = letterMap[letters[i]]; ok {
+			if mapped, ok := letterMap[letters[i]]; ok && mapped != letters[i] {
 				return fmt.Errorf("invalid pair %s, letter %s already connected", pair, string(pair[i]))
 			}
 		}
