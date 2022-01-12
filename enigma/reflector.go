@@ -5,13 +5,23 @@ import (
 	"strings"
 )
 
-type reflector struct {
-	reflectorType reflectorType
-	letterMap     map[int]int
-	position      int
+type ReflectorSetup struct {
+	ReflectorType ReflectorType
+	WheelPosition byte
+	Wiring        string
 }
 
-func newReflector(reflectorType reflectorType) reflector {
+func (r ReflectorSetup) isEmpty() bool {
+	return r.ReflectorType == "" && r.WheelPosition == 0 && r.Wiring == ""
+}
+
+type reflector struct {
+	reflectorType ReflectorType
+	letterMap     map[int]int
+	wheelPosition int
+}
+
+func newReflector(reflectorType ReflectorType) reflector {
 	wiring := reflectorType.getWiring()
 	if !Alphabet.isValidWiring(wiring) {
 		panic(fmt.Errorf("invalid reflector wiring %s", wiring))
@@ -30,12 +40,35 @@ func newReflector(reflectorType reflectorType) reflector {
 	return reflector{
 		reflectorType: reflectorType,
 		letterMap:     letterMap,
-		position:      0,
+		wheelPosition: 0,
 	}
 }
 
+func (r *reflector) setWheelPosition(letter byte) error {
+	if len(r.reflectorType.getPositions()) <= 1 {
+		return fmt.Errorf("reflector %s is fixed, cannot change position", r.reflectorType)
+	}
+	index, ok := Alphabet.charToInt(letter)
+	if !ok {
+		return fmt.Errorf("invalid reflector position %s", string(letter))
+	}
+	supported := false
+	for _, pos := range r.reflectorType.getPositions() {
+		if pos == index {
+			supported = true
+			break
+		}
+	}
+	if !supported {
+		return fmt.Errorf("reflector %s does not support position %s", r.reflectorType, string(letter))
+	}
+
+	r.wheelPosition = index
+	return nil
+}
+
 func (r *reflector) setWiring(wiring string) error {
-	if !r.reflectorType.isRewirable() {
+	if !r.reflectorType.IsRewirable() {
 		return fmt.Errorf("reflector %s is not rewirable, cannot change wiring", r.reflectorType)
 	}
 
@@ -80,30 +113,7 @@ func (r *reflector) setWiring(wiring string) error {
 	return nil
 }
 
-func (r *reflector) setPosition(position byte) error {
-	if len(r.reflectorType.getPositions()) <= 1 {
-		return fmt.Errorf("reflector %s is fixed, cannot change position", r.reflectorType)
-	}
-	index, ok := Alphabet.charToInt(position)
-	if !ok {
-		return fmt.Errorf("invalid reflector position %s", string(position))
-	}
-	supported := false
-	for _, pos := range r.reflectorType.getPositions() {
-		if pos == index {
-			supported = true
-			break
-		}
-	}
-	if !supported {
-		return fmt.Errorf("reflector %s does not support position %s", r.reflectorType, string(position))
-	}
-
-	r.position = index
-	return nil
-}
-
 func (r *reflector) translate(input int) int {
-	rotatedOutput := r.letterMap[shift(input, r.position)]
-	return shift(rotatedOutput, -r.position) // don't forget to rotate back...
+	rotatedOutput := r.letterMap[shift(input, r.wheelPosition)]
+	return shift(rotatedOutput, -r.wheelPosition) // don't forget to rotate back...
 }

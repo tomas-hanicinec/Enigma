@@ -9,7 +9,7 @@ import (
 
 func TestEnigma_Encode(t *testing.T) {
 	type fields struct {
-		model           model
+		model           Model
 		reflectorConfig string // B | 15 | AA BB CC DD EE ...
 		rotorConfig     string // I IV VII | A U C | 1 14 3
 		plugboardConfig string // AA BB CC DD EE FF GG HH II JJ
@@ -111,21 +111,25 @@ func TestEnigma_Encode(t *testing.T) {
 
 // todo - error cases (config & encode errors)
 
-func createEnigma(model model, reflectorConfig string, rotorConfig string, plugboardConfig string) (Enigma, error) {
-	e := NewEnigma(model)
+func createEnigma(model Model, reflectorConfig string, rotorConfig string, plugboardConfig string) (Enigma, error) {
+	e, err := NewEnigma(model)
+	if err != nil {
+		return Enigma{}, err
+	}
 
+	// todo - use global configuration methods
 	// Reflector
 	conf := strings.Split(reflectorConfig, "|")
 	refType := strings.TrimSpace(conf[0])
 	if refType != "" {
-		if err := e.ReflectorSelect(reflectorType(refType)); err != nil {
+		if err := e.ReflectorSelect(ReflectorType(refType)); err != nil {
 			return Enigma{}, fmt.Errorf("reflector select error: %w", err)
 		}
 	}
 
 	refPosition := strings.TrimSpace(conf[1])
 	if refPosition != "" {
-		if err := e.ReflectorSet(byte(refPosition[0])); err != nil {
+		if err := e.ReflectorSetWheel(refPosition[0]); err != nil {
 			return Enigma{}, fmt.Errorf("reflector set error: %w", err)
 		}
 	}
@@ -185,7 +189,7 @@ func createEnigma(model model, reflectorConfig string, rotorConfig string, plugb
 
 	// Plugboard
 	if plugboardConfig != "" {
-		if err := e.PlugboardSet(plugboardConfig); err != nil {
+		if err := e.PlugboardSetup(plugboardConfig); err != nil {
 			return Enigma{}, fmt.Errorf("plugboard set error: %w", err)
 		}
 	}

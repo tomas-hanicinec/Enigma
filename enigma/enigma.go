@@ -5,7 +5,7 @@ import (
 )
 
 type Enigma struct {
-	model
+	Model
 	plugboard        plugboard
 	entryWheel       etw
 	rotors           []rotor
@@ -22,11 +22,14 @@ const (
 	Fourth RotorSlot = 3
 )
 
-func NewEnigma(model model) Enigma {
+func NewEnigma(model Model) (Enigma, error) {
+	if !model.Exists() {
+		return Enigma{}, fmt.Errorf("unsupported model %s", model)
+	}
 	e := Enigma{
-		model:            model,
+		Model:            model,
 		plugboard:        newPlugboard(model.HasPlugboard()),
-		entryWheel:       newEtw(model.GetEtwWiring()),
+		entryWheel:       newEtw(model.getEtwWiring()),
 		rotors:           []rotor{},
 		reflector:        newReflector(model.getDefaultReflectorType()),
 		reflectorIsWired: false,
@@ -37,51 +40,108 @@ func NewEnigma(model model) Enigma {
 		panic(fmt.Errorf("failed to select default rotors in %s model: %w", e.GetName(), err))
 	}
 
-	return e
+	return e, nil
+}
+
+func NewEnigmaWithSetup(model Model, rotors map[RotorSlot]RotorSetup, reflector ReflectorSetup, plugboard string) (Enigma, error) {
+	e, err := NewEnigma(model)
+	if err != nil {
+		return Enigma{}, err
+	}
+
+	if err := e.RotorsSetup(rotors); err != nil {
+		return Enigma{}, fmt.Errorf("failed to setup rotors: %w", err)
+	}
+
+	if !reflector.isEmpty() {
+		if err := e.ReflectorSetup(reflector); err != nil {
+			return Enigma{}, fmt.Errorf("failed to setup reflector: %w", err)
+		}
+	}
+
+	if plugboard != "" {
+		if err := e.PlugboardSetup(plugboard); err != nil {
+			return Enigma{}, fmt.Errorf("failed to setup plugboard: %w", err)
+		}
+	}
+
+	return e, nil
 }
 
 // -------------------------------------- SETUP --------------------------------------
 
-func (e *Enigma) RotorsSelect(rotorTypes map[RotorSlot]RotorType) error {
-	if len(rotorTypes) != e.GetRotorCount() {
-		return fmt.Errorf("%s model has %d rotors, but %d rotors selected", e.GetName(), e.GetRotorCount(), len(rotorTypes))
+func (e *Enigma) RotorsSetup(setup map[RotorSlot]RotorSetup) error {
+	types := map[RotorSlot]RotorType{}
+	for slot, rotorSetup := range setup {
+		types[slot] = rotorSetup.RotorType
+	}
+	rotors, err := e.getRotors(types)
+	if err != nil {
+		return fmt.Errorf("failed to setup rotor types: %w", err)
 	}
 
-	rotors := make([]rotor, e.GetRotorCount())
-	isDuplicateSlot := map[RotorSlot]struct{}{}
-	isDuplicateType := map[RotorType]struct{}{}
-	for slot, rotorType := range rotorTypes {
-		if !rotorType.exists() {
-			return fmt.Errorf("invalid rotor type %s", rotorType)
-		}
-		// handle duplicates
-		if _, ok := isDuplicateSlot[slot]; ok {
-			return fmt.Errorf("cannot select rotor for slot number %d twice", slot)
-		}
-		if _, ok := isDuplicateType[rotorType]; ok {
-			return fmt.Errorf("cannot select the rotor %s twice", rotorType)
-		}
-		// can only populate as many slots as the current model supports
-		if int(slot) >= e.GetRotorCount() {
-			return fmt.Errorf("cannot select rotor for slot number %d, Enigma model %s only has %d rotors", slot, e.GetName(), e.GetRotorCount())
-		}
-		// handle 4th rotor (only 2 rotors can fit to the 4th slot and vice-versa)
-		isFourth := slot == Fourth
-		if rotorType.canBeFourth() != isFourth {
-			if isFourth {
-				return fmt.Errorf("rotor %s cannot be selected as the fourth rotor", rotorType)
-			} else {
-				return fmt.Errorf("rotor %s can only be selected as the fourth rotor", rotorType)
+	for slot, rotorSetup := range setup {
+		if rotorSetup.WheelPosition != 0 {
+			if err = rotors[e.rotorSlotToIndex(slot)].setWheelPosition(rotorSetup.WheelPosition); err != nil {
+				return fmt.Errorf("failed to set wheel position for rotor %s: %w", rotorSetup.RotorType, err)
 			}
 		}
-		// all good, add the rotor
-		rotors[slot] = newRotor(rotorType)
-		isDuplicateSlot[slot] = struct{}{}
-		isDuplicateType[rotorType] = struct{}{}
+		if rotorSetup.RingPosition != 0 {
+			if err = rotors[e.rotorSlotToIndex(slot)].setRingPosition(rotorSetup.RingPosition); err != nil {
+				return fmt.Errorf("failed to set ring position for rotor %s: %w", rotorSetup.RotorType, err)
+			}
+		}
 	}
 
 	e.rotors = rotors
 	return nil
+}
+
+func (e *Enigma) RotorsSelect(rotorTypes map[RotorSlot]RotorType) error {
+	rotors, err := e.getRotors(rotorTypes)
+	if err == nil {
+		e.rotors = rotors
+	}
+	return err
+}
+
+func (e *Enigma) getRotors(rotorTypes map[RotorSlot]RotorType) ([]rotor, error) {
+	if len(rotorTypes) != e.GetRotorCount() {
+		return nil, fmt.Errorf("%s model has %d rotors, but %d rotors selected", e.GetName(), e.GetRotorCount(), len(rotorTypes))
+	}
+
+	rotors := make([]rotor, e.GetRotorCount())
+	isDuplicateType := map[RotorType]struct{}{}
+	for slot, rotorType := range rotorTypes {
+		if !rotorType.exists() {
+			return nil, fmt.Errorf("invalid rotor type %s", rotorType)
+		}
+		if !e.supportsRotorType(rotorType) {
+			return nil, fmt.Errorf("%s model does not support rotor %s", e.GetName(), rotorType)
+		}
+		// handle duplicates
+		if _, ok := isDuplicateType[rotorType]; ok {
+			return nil, fmt.Errorf("cannot select the rotor %s twice", rotorType)
+		}
+		// can only populate as many slots as the current model supports
+		if int(slot) >= e.GetRotorCount() {
+			return nil, fmt.Errorf("cannot select rotor for slot number %d, %s model only has %d rotors", slot, e.GetName(), e.GetRotorCount())
+		}
+		// handle 4th rotor (only 2 rotors can fit to the 4th slot and vice-versa)
+		isFourth := slot == Fourth
+		if rotorType.CanBeFourth() != isFourth {
+			if isFourth {
+				return nil, fmt.Errorf("rotor %s cannot be selected as the fourth rotor", rotorType)
+			} else {
+				return nil, fmt.Errorf("rotor %s can only be selected as the fourth rotor", rotorType)
+			}
+		}
+		// all good, add the rotor
+		rotors[slot] = newRotor(rotorType)
+		isDuplicateType[rotorType] = struct{}{}
+	}
+
+	return rotors, nil
 }
 
 func (e *Enigma) RotorSetWheel(slot RotorSlot, position byte) error {
@@ -98,20 +158,53 @@ func (e *Enigma) RotorSetRing(slot RotorSlot, position int) error {
 	return e.rotors[e.rotorSlotToIndex(slot)].setRingPosition(position)
 }
 
-func (e *Enigma) ReflectorSelect(reflectorType reflectorType) error {
-	// check if the type is supported by the model
-	supported := false
-	for _, ref := range e.GetAvailableReflectors() {
-		if ref == reflectorType {
-			supported = true
-			break
-		}
-	}
-	if !supported {
-		return fmt.Errorf("%s model does not support reflector %s", e.GetName(), reflectorType)
+func (e *Enigma) ReflectorSetup(setup ReflectorSetup) error {
+	ref, err := e.getReflector(setup.ReflectorType)
+	if err != nil {
+		return fmt.Errorf("failed to select reflector: %w", err)
 	}
 
-	e.reflector = newReflector(reflectorType)
+	if setup.WheelPosition != 0 {
+		if err = ref.setWheelPosition(setup.WheelPosition); err != nil {
+			return fmt.Errorf("failed to set reflector position: %w", err)
+		}
+	}
+
+	isWired := false
+	if setup.Wiring != "" {
+		if err = ref.setWiring(setup.Wiring); err != nil {
+			return fmt.Errorf("failed to rewire reflector: %w", err)
+		}
+		isWired = true
+	}
+
+	e.reflector = ref
+	e.reflectorIsWired = isWired
+	return nil
+}
+
+func (e *Enigma) ReflectorSelect(reflectorType ReflectorType) error {
+	ref, err := e.getReflector(reflectorType)
+	if err == nil {
+		e.reflector = ref
+	}
+	return err
+}
+
+func (e *Enigma) getReflector(reflectorType ReflectorType) (reflector, error) {
+	if !e.supportsReflectorType(reflectorType) {
+		return reflector{}, fmt.Errorf("%s model does not support reflector %s", e.GetName(), reflectorType)
+	}
+
+	return newReflector(reflectorType), nil
+}
+
+func (e *Enigma) ReflectorSetWheel(position byte) error {
+	err := e.reflector.setWheelPosition(position)
+	if err != nil {
+		return err
+	}
+	e.reflectorIsWired = false
 	return nil
 }
 
@@ -124,16 +217,7 @@ func (e *Enigma) ReflectorRewire(wiring string) error {
 	return nil
 }
 
-func (e *Enigma) ReflectorSet(position byte) error {
-	err := e.reflector.setPosition(position)
-	if err != nil {
-		return err
-	}
-	e.reflectorIsWired = false
-	return nil
-}
-
-func (e *Enigma) PlugboardSet(plugConfig string) error {
+func (e *Enigma) PlugboardSetup(plugConfig string) error {
 	if !e.HasPlugboard() {
 		return fmt.Errorf("%s model does not have plugboard, cannot set", e.GetName())
 	}
@@ -151,6 +235,24 @@ func (e *Enigma) validateRotorSlot(slot RotorSlot) error {
 	return nil
 }
 
+func (e *Enigma) supportsRotorType(rotorType RotorType) bool {
+	for _, rot := range e.GetAvailableRotors() {
+		if rot == rotorType {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *Enigma) supportsReflectorType(reflectorType ReflectorType) bool {
+	for _, ref := range e.GetAvailableReflectors() {
+		if ref == reflectorType {
+			return true
+		}
+	}
+	return false
+}
+
 func (e *Enigma) rotorSlotToIndex(slot RotorSlot) int {
 	return int(slot)
 }
@@ -160,7 +262,7 @@ func (e *Enigma) rotorIndexToSlot(index int) RotorSlot {
 }
 
 func (e *Enigma) validateSettings() error {
-	if e.reflector.reflectorType.isRewirable() && !e.reflectorIsWired {
+	if e.reflector.reflectorType.IsRewirable() && !e.reflectorIsWired {
 		return fmt.Errorf("must specify reflector wiring")
 	}
 

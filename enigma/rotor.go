@@ -4,6 +4,12 @@ import (
 	"fmt"
 )
 
+type RotorSetup = struct {
+	RotorType     RotorType
+	WheelPosition byte
+	RingPosition  int
+}
+
 type rotor struct {
 	rotorType      RotorType
 	wiringMapIn    map[int]int // In = first pass through the rotors (from the plugboard to the reflector)
@@ -61,11 +67,11 @@ func (r *rotor) setWheelPosition(letter byte) error {
 }
 
 func (r *rotor) setRingPosition(position int) error {
-	if !r.rotorType.hasRing() {
+	if !r.rotorType.HasRing() {
 		return fmt.Errorf("rotor %s does not have a movable ring", r.rotorType)
 	}
 	if position < 1 || position > Alphabet.getSize() {
-		return fmt.Errorf("invalid ring position, must be a number between 1 and %d", Alphabet.getSize())
+		return fmt.Errorf("invalid ring position %d, must be a number between 1 and %d", position, Alphabet.getSize())
 	}
 	r.ringPosition = position
 	return nil

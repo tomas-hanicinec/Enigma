@@ -25,7 +25,7 @@ func (r RotorType) exists() bool {
 	return ok
 }
 
-func (r RotorType) hasRing() bool {
+func (r RotorType) HasRing() bool {
 	return rotorDefinitions[r].hasRing
 }
 
@@ -33,7 +33,7 @@ func (r RotorType) getNotchPositions() []byte {
 	return rotorDefinitions[r].notchPositions
 }
 
-func (r RotorType) canBeFourth() bool {
+func (r RotorType) CanBeFourth() bool {
 	return rotorDefinitions[r].canBeFourth
 }
 

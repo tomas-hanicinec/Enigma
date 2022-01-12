@@ -1,30 +1,35 @@
 package enigma
 
-type reflectorType string
+type ReflectorType string
 
 const (
-	UKW_A     reflectorType = "A"
-	UKW_B                   = "B"
-	UKW_C                   = "C"
-	UKW_BThin               = "BThin"
-	UKW_CThin               = "CThin"
-	UKW_D                   = "D"
-	UKW_K                   = "K"
+	UKW_A     ReflectorType = "A"
+	UKW_B     ReflectorType = "B"
+	UKW_C     ReflectorType = "C"
+	UKW_BThin ReflectorType = "BThin"
+	UKW_CThin ReflectorType = "CThin"
+	UKW_D     ReflectorType = "D"
+	UKW_K     ReflectorType = "K"
 )
 
-func (r reflectorType) isRewirable() bool {
+func (r ReflectorType) IsRewirable() bool {
 	return reflectorDefinitions[r].isRewirable
 }
 
-func (r reflectorType) isThin() bool {
+func (r ReflectorType) IsThin() bool {
 	return reflectorDefinitions[r].isThin
 }
 
-func (r reflectorType) getPositions() []int {
+func (r ReflectorType) IsMovable() bool {
+	// todo - is there something else than fully rotatable reflector in commercial enigmas? if not, cancel the explicit positions array
+	return len(reflectorDefinitions[r].positions) > 0
+}
+
+func (r ReflectorType) getPositions() []int {
 	return reflectorDefinitions[r].positions
 }
 
-func (r reflectorType) getWiring() string {
+func (r ReflectorType) getWiring() string {
 	return reflectorDefinitions[r].wiring
 }
 
@@ -35,7 +40,7 @@ type reflectorDefinition struct {
 	wiring      string
 }
 
-var reflectorDefinitions = map[reflectorType]reflectorDefinition{
+var reflectorDefinitions = map[ReflectorType]reflectorDefinition{
 	UKW_K: {
 		isRewirable: false,
 		isThin:      false,

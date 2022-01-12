@@ -2,10 +2,10 @@ package enigma
 
 import "fmt"
 
-type model string
+type Model string
 
 const (
-	SwissK model = "Swiss-K"
+	SwissK Model = "Swiss-K"
 	One          = "I"
 	M3           = "M3"
 	M4           = "M4"
@@ -19,8 +19,8 @@ const (
 	etwSwiss    = "QWERTZUIOASDFGHJKPYXCVBNML"
 )
 
-func GetModels() []model {
-	return []model{
+func GetModels() []Model {
+	return []Model{
 		SwissK,
 		One,
 		M3,
@@ -29,36 +29,36 @@ func GetModels() []model {
 	}
 }
 
-func (m model) Exists() bool {
+func (m Model) Exists() bool {
 	_, ok := models[m]
 	return ok
 }
 
-func (m model) GetName() string {
+func (m Model) GetName() string {
 	return models[m].name
 }
 
-func (m model) GetDescription() string {
+func (m Model) GetDescription() string {
 	return models[m].description
 }
 
-func (m model) GetEtwWiring() etwWiring {
+func (m Model) getEtwWiring() etwWiring {
 	return models[m].etw
 }
 
-func (m model) HasPlugboard() bool {
+func (m Model) HasPlugboard() bool {
 	return models[m].hasPlugboard
 }
 
-func (m model) GetRotorCount() int {
+func (m Model) GetRotorCount() int {
 	return models[m].rotorCount
 }
 
-func (m model) GetAvailableRotors() []RotorType {
+func (m Model) GetAvailableRotors() []RotorType {
 	return models[m].rotors
 }
 
-func (m model) getDefaultRotorTypes() map[RotorSlot]RotorType {
+func (m Model) getDefaultRotorTypes() map[RotorSlot]RotorType {
 	result := make(map[RotorSlot]RotorType)
 
 	// basic three rotors
@@ -66,7 +66,7 @@ func (m model) getDefaultRotorTypes() map[RotorSlot]RotorType {
 	i := 0
 	for _, rotor := range m.GetAvailableRotors() {
 		// pick first 3 rotors that cannot be 4th
-		if !rotor.canBeFourth() {
+		if !rotor.CanBeFourth() {
 			result[slots[i]] = rotor
 			i++
 		}
@@ -79,7 +79,7 @@ func (m model) getDefaultRotorTypes() map[RotorSlot]RotorType {
 	if m.GetRotorCount() == 4 {
 		// pick first rotor that can be 4th
 		for _, rotor := range m.GetAvailableRotors() {
-			if rotor.canBeFourth() {
+			if rotor.CanBeFourth() {
 				result[Fourth] = rotor
 				break
 			}
@@ -93,11 +93,11 @@ func (m model) getDefaultRotorTypes() map[RotorSlot]RotorType {
 	return result
 }
 
-func (m model) GetAvailableReflectors() []reflectorType {
+func (m Model) GetAvailableReflectors() []ReflectorType {
 	return models[m].reflectors
 }
 
-func (m model) getDefaultReflectorType() reflectorType {
+func (m Model) getDefaultReflectorType() ReflectorType {
 	return models[m].reflectors[0]
 }
 
@@ -106,12 +106,12 @@ type modelDefinition struct {
 	description  string
 	hasPlugboard bool
 	rotorCount   int
-	reflectors   []reflectorType
+	reflectors   []ReflectorType
 	rotors       []RotorType
 	etw          etwWiring
 }
 
-var models = map[model]modelDefinition{
+var models = map[Model]modelDefinition{
 	// todo - better descriptions
 	// todo - more models
 	SwissK: {
@@ -119,7 +119,7 @@ var models = map[model]modelDefinition{
 		description:  "1939, based on commercial D, movable reflector, different entry-wheel (QWERTZ)",
 		hasPlugboard: false,
 		rotorCount:   3,
-		reflectors:   []reflectorType{UKW_K},
+		reflectors:   []ReflectorType{UKW_K},
 		rotors:       []RotorType{Rotor_IK, Rotor_IIK, Rotor_IIIK},
 		etw:          etwSwiss,
 	},
@@ -128,7 +128,7 @@ var models = map[model]modelDefinition{
 		description:  "1930–1938, based on commercial D, fixed reflector, added plugboard, notches on the movable rings, since 1935 air force used it too",
 		hasPlugboard: true,
 		rotorCount:   3,
-		reflectors:   []reflectorType{UKW_A, UKW_B},
+		reflectors:   []ReflectorType{UKW_A, UKW_B},
 		rotors:       []RotorType{Rotor_I, Rotor_II, Rotor_III},
 		etw:          etwStandard,
 	},
@@ -137,7 +137,7 @@ var models = map[model]modelDefinition{
 		description:  "1934, navy version of Enigma I, added more rotors to choose from (1934 - 5, 1938 - 7, 1939 - 8)",
 		hasPlugboard: true,
 		rotorCount:   3,
-		reflectors:   []reflectorType{UKW_A, UKW_B, UKW_C, UKW_D},
+		reflectors:   []ReflectorType{UKW_A, UKW_B, UKW_C, UKW_D},
 		rotors:       []RotorType{Rotor_I, Rotor_II, Rotor_III, Rotor_IV, Rotor_V, Rotor_VI, Rotor_VII, Rotor_VIII},
 		etw:          etwStandard,
 	},
@@ -146,7 +146,7 @@ var models = map[model]modelDefinition{
 		description:  "1942, reflector replaced by a thinner reflector and a fourth rotor, used for U-boat traffic",
 		hasPlugboard: true,
 		rotorCount:   4,
-		reflectors:   []reflectorType{UKW_BThin, UKW_CThin},
+		reflectors:   []ReflectorType{UKW_BThin, UKW_CThin},
 		rotors:       []RotorType{Rotor_I, Rotor_II, Rotor_III, Rotor_IV, Rotor_V, Rotor_VI, Rotor_VII, Rotor_VIII, Rotor_beta, Rotor_gamma},
 		etw:          etwStandard,
 	},
@@ -155,7 +155,7 @@ var models = map[model]modelDefinition{
 		description:  "1944, added reconfigurable reflector",
 		hasPlugboard: true,
 		rotorCount:   3,
-		reflectors:   []reflectorType{UKW_D},
+		reflectors:   []ReflectorType{UKW_D},
 		rotors:       []RotorType{Rotor_I, Rotor_II, Rotor_III, Rotor_IV, Rotor_V, Rotor_VI, Rotor_VII, Rotor_VIII},
 		etw:          etwStandard,
 	},
