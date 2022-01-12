@@ -1,8 +1,9 @@
 package enigma
 
-import "sort"
-
-type char byte
+import (
+	"sort"
+	"strings"
+)
 
 var Alphabet = newAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -28,8 +29,8 @@ func (a *alphabet) charToInt(letter byte) (int, bool) {
 	return val, ok
 }
 
-func (a *alphabet) intToChar(index int) char {
-	return char(a.letterMap[index])
+func (a *alphabet) intToChar(index int) byte {
+	return a.letterMap[index]
 }
 
 func (a *alphabet) getSize() int {
@@ -68,4 +69,32 @@ func shift(input int, shiftBy int) int {
 		result = Alphabet.getSize() + result
 	}
 	return result
+}
+
+// getDefaultLetterMap generates mapping of each letter in the alphabet to itself
+func getDefaultLetterMap() map[int]int {
+	letterMap := make(map[int]int, Alphabet.getSize())
+	for i := 0; i < Alphabet.getSize(); i++ {
+		letterMap[i] = i
+	}
+	return letterMap
+}
+
+func Preprocess(text string) string {
+	text = strings.ToUpper(text) // convert to uppercase
+	// replace punctuations with double letters
+	// todo - do this more elaborately (currently COMPLEX PROCEDURE -> COMPLE XPROCEDURE)
+	text = strings.ReplaceAll(text, " ", "XX")
+	text = strings.ReplaceAll(text, ".", "YY")
+	text = strings.ReplaceAll(text, ",", "ZZ")
+
+	return text
+}
+
+func Postprocess(text string) string {
+	// convert back the punctuation
+	text = strings.ReplaceAll(text, "XX", " ")
+	text = strings.ReplaceAll(text, "YY", ".")
+	text = strings.ReplaceAll(text, "ZZ", ",")
+	return text
 }

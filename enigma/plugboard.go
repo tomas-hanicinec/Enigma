@@ -60,11 +60,3 @@ func (pb *plugboard) setup(plugConfig string) error {
 func (pb *plugboard) translate(letter int) int {
 	return pb.letterMap[letter]
 }
-
-func getDefaultLetterMap() map[int]int {
-	letterMap := make(map[int]int, Alphabet.getSize())
-	for i := 0; i < Alphabet.getSize(); i++ {
-		letterMap[i] = i
-	}
-	return letterMap
-}

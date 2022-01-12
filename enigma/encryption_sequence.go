@@ -5,8 +5,7 @@ import (
 	"strings"
 )
 
-// todo - improve/ expand this so it is clear what happens (now confusing because of implicit rotation)
-type encryptionSequence struct {
+type EncryptionSequence struct {
 	rotorPositions []int
 	in             int
 	out            int
@@ -18,15 +17,15 @@ type encryptionStep struct {
 	out   int
 }
 
-func (es *encryptionSequence) start(rotors []rotor, letterToEncrypt int) {
+func (es *EncryptionSequence) start(rotors []rotor, letterToEncrypt int) {
 	es.in = letterToEncrypt
 	es.rotorPositions = make([]int, len(rotors))
 	for i := range rotors {
-		es.rotorPositions[i] = rotors[i].getPosition()
+		es.rotorPositions[i] = rotors[i].getWheelPosition()
 	}
 }
 
-func (es *encryptionSequence) addStep(title string, encodedLetter int) {
+func (es *EncryptionSequence) addStep(title string, encodedLetter int) {
 	step := encryptionStep{
 		title: title,
 		out:   encodedLetter,
@@ -34,22 +33,22 @@ func (es *encryptionSequence) addStep(title string, encodedLetter int) {
 	es.steps = append(es.steps, step)
 }
 
-func (es *encryptionSequence) finish(encodedLetter int) {
+func (es *EncryptionSequence) finish(encodedLetter int) {
 	es.out = encodedLetter
 }
 
-func (es *encryptionSequence) getResult() char {
+func (es *EncryptionSequence) GetResult() byte {
 	return Alphabet.intToChar(es.out)
 }
 
-func (es *encryptionSequence) format() string {
+func (es *EncryptionSequence) Format() string {
 	separator := "---------------------------------\n"
 	positions := make([]string, len(es.rotorPositions))
 	for i, position := range es.rotorPositions {
-		positions[i] = string(Alphabet.intToChar(position))
+		positions[len(es.rotorPositions)-i-1] = string(Alphabet.intToChar(position))
 	}
 	result := fmt.Sprintf("INPUT: %s\n", string(Alphabet.intToChar(es.in)))
-	result += fmt.Sprintf("rotor positions: %s\n", strings.Join(positions, ", "))
+	result += fmt.Sprintf("rotor wheel positions: %s\n", strings.Join(positions, ", "))
 	for _, step := range es.steps {
 		result += fmt.Sprintf("%s: %s\n", step.title, string(Alphabet.intToChar(step.out)))
 	}

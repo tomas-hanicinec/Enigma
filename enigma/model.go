@@ -58,26 +58,31 @@ func (m model) GetAvailableRotors() []RotorType {
 	return models[m].rotors
 }
 
-func (m model) getDefaultRotorTypes() []RotorType {
-	result := make([]RotorType, 0, m.GetRotorCount())
+func (m model) getDefaultRotorTypes() map[RotorSlot]RotorType {
+	result := make(map[RotorSlot]RotorType)
+
+	// basic three rotors
+	slots := []RotorSlot{Right, Middle, Left}
+	i := 0
+	for _, rotor := range m.GetAvailableRotors() {
+		// pick first 3 rotors that cannot be 4th
+		if !rotor.canBeFourth() {
+			result[slots[i]] = rotor
+			i++
+		}
+		if i >= len(slots) {
+			break
+		}
+	}
+
+	// fourth rotor
 	if m.GetRotorCount() == 4 {
 		// pick first rotor that can be 4th
 		for _, rotor := range m.GetAvailableRotors() {
 			if rotor.canBeFourth() {
-				result = append(result, rotor)
+				result[Fourth] = rotor
 				break
 			}
-		}
-	}
-	remaining := 3
-	for _, rotor := range m.GetAvailableRotors() {
-		// pick first 3 rotors that cannot be 4th
-		if !rotor.canBeFourth() {
-			result = append(result, rotor)
-			remaining--
-		}
-		if remaining == 0 {
-			break
 		}
 	}
 
@@ -108,6 +113,7 @@ type modelDefinition struct {
 
 var models = map[model]modelDefinition{
 	// todo - better descriptions
+	// todo - more models
 	SwissK: {
 		name:         "Swiss-K",
 		description:  "1939, based on commercial D, movable reflector, different entry-wheel (QWERTZ)",

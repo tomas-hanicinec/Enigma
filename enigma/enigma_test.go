@@ -87,7 +87,6 @@ func TestEnigma_Encode(t *testing.T) {
 			wantConfigErr: false,
 			wantEncodeErr: false,
 		},
-		// todo - error cases (config & encode errors). maybe use separate test?
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -102,11 +101,15 @@ func TestEnigma_Encode(t *testing.T) {
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Encode()\n got = %v\nwant = %v", got, tt.want)
+				t.Errorf("Encode()\nwant = %v\n got = %v", got, tt.want)
 			}
 		})
 	}
 }
+
+// todo - encode -> decode (including preprocess + postprocess functions)
+
+// todo - error cases (config & encode errors)
 
 func createEnigma(model model, reflectorConfig string, rotorConfig string, plugboardConfig string) (Enigma, error) {
 	e := NewEnigma(model)
@@ -137,10 +140,17 @@ func createEnigma(model model, reflectorConfig string, rotorConfig string, plugb
 	// Rotors
 	conf = strings.Split(rotorConfig, "|")
 	rotorTypes := strings.TrimSpace(conf[0])
+	slots := []RotorSlot{Fourth, Left, Middle, Right}
+	firstRotorSlotIndex := 0
+	if e.GetRotorCount() == 3 {
+		firstRotorSlotIndex = 1
+	}
 	if rotorTypes != "" {
-		types := make([]RotorType, 0)
+		types := make(map[RotorSlot]RotorType)
+		i := firstRotorSlotIndex
 		for _, rType := range strings.Split(rotorTypes, " ") {
-			types = append(types, RotorType(rType))
+			types[slots[i]] = RotorType(rType)
+			i++
 		}
 		if err := e.RotorsSelect(types); err != nil {
 			return Enigma{}, fmt.Errorf("rotor select error: %w", err)
@@ -149,23 +159,27 @@ func createEnigma(model model, reflectorConfig string, rotorConfig string, plugb
 
 	wheelConfig := strings.TrimSpace(conf[1])
 	if wheelConfig != "" {
-		for i, val := range strings.Split(wheelConfig, " ") {
-			if err := e.RotorSetWheel(e.rotorIndexToSlot(i), val[0]); err != nil {
-				return Enigma{}, fmt.Errorf("rotor %d set error: %w", i, err)
+		i := firstRotorSlotIndex
+		for _, val := range strings.Split(wheelConfig, " ") {
+			if err := e.RotorSetWheel(slots[i], val[0]); err != nil {
+				return Enigma{}, fmt.Errorf("rotor %d wheel set error: %w", slots[i], err)
 			}
+			i++
 		}
 	}
 
 	ringConfig := strings.TrimSpace(conf[2])
 	if ringConfig != "" {
-		for i, val := range strings.Split(ringConfig, " ") {
+		i := firstRotorSlotIndex
+		for _, val := range strings.Split(ringConfig, " ") {
 			pos, err := strconv.Atoi(val)
 			if err != nil {
 				return Enigma{}, fmt.Errorf("invalid ring config %s: %w", val, err)
 			}
-			if err := e.RotorSetRing(e.rotorIndexToSlot(i), pos); err != nil {
-				return Enigma{}, fmt.Errorf("ring %d set error: %w", i, err)
+			if err := e.RotorSetRing(slots[i], pos); err != nil {
+				return Enigma{}, fmt.Errorf("rotor %d ring set error: %w", slots[i], err)
 			}
+			i++
 		}
 	}
 

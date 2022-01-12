@@ -6,9 +6,9 @@ import (
 )
 
 type reflector struct {
-	reflectorType  reflectorType
-	translationMap map[int]int
-	position       int
+	reflectorType reflectorType
+	letterMap     map[int]int
+	position      int
 }
 
 func newReflector(reflectorType reflectorType) reflector {
@@ -28,26 +28,26 @@ func newReflector(reflectorType reflectorType) reflector {
 	}
 
 	return reflector{
-		reflectorType:  reflectorType,
-		translationMap: letterMap,
-		position:       0,
+		reflectorType: reflectorType,
+		letterMap:     letterMap,
+		position:      0,
 	}
 }
 
 func (r *reflector) setWiring(wiring string) error {
-	// todo - do not allow UKW-D without custom wiring (or provide default one)
 	if !r.reflectorType.isRewirable() {
 		return fmt.Errorf("reflector %s is not rewirable, cannot change wiring", r.reflectorType)
 	}
 
 	// UKW-D rewirable reflectors had different letter order (JY were always connected, the rest 12 pairs were configurable)
 	ukwdOrder := "AJZXWVUTSRQPONYMLKIHGFEDCB"
-	wiringMap := getDefaultWiring()
-	wiring += " JY" //todo - do better (check wiring before changing it to avoid misleading error messages)
+	wiringMap := getDefaultLetterMap()
+	wiringMap[strings.IndexByte(ukwdOrder, 'J')] = strings.IndexByte(ukwdOrder, 'Y')
+	wiringMap[strings.IndexByte(ukwdOrder, 'Y')] = strings.IndexByte(ukwdOrder, 'J')
 
 	// rewire the reflector
 	pairs := strings.Split(wiring, " ")
-	expectedSize := Alphabet.getSize() / 2
+	expectedSize := Alphabet.getSize()/2 - 1
 	if len(pairs) != expectedSize {
 		return fmt.Errorf("incomplete wiring of the reflector, must include %d pairs to cover the whole alphabet", expectedSize)
 	}
@@ -76,7 +76,7 @@ func (r *reflector) setWiring(wiring string) error {
 		wiringMap[letters[1]] = letters[0]
 	}
 
-	r.translationMap = wiringMap
+	r.letterMap = wiringMap
 	return nil
 }
 
@@ -104,14 +104,6 @@ func (r *reflector) setPosition(position byte) error {
 }
 
 func (r *reflector) translate(input int) int {
-	rotatedOutput := r.translationMap[shift(input, r.position)]
+	rotatedOutput := r.letterMap[shift(input, r.position)]
 	return shift(rotatedOutput, -r.position) // don't forget to rotate back...
-}
-
-func getDefaultWiring() map[int]int {
-	letterMap := make(map[int]int, Alphabet.getSize())
-	for i := 0; i < Alphabet.getSize(); i++ {
-		letterMap[i] = i
-	}
-	return letterMap
 }

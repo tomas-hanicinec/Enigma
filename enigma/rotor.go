@@ -71,8 +71,7 @@ func (r *rotor) setRingPosition(position int) error {
 	return nil
 }
 
-// todo - add ring setting to Sequence struct
-func (r *rotor) getPosition() int {
+func (r *rotor) getWheelPosition() int {
 	return r.wheelPosition
 }
 
