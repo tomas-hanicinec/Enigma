@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-type ReflectorSetup struct {
+type ReflectorConfig struct {
 	ReflectorType ReflectorType
 	WheelPosition byte
 	Wiring        string
 }
 
-func (r ReflectorSetup) isEmpty() bool {
+func (r ReflectorConfig) isEmpty() bool {
 	return r.ReflectorType == "" && r.WheelPosition == 0 && r.Wiring == ""
 }
 

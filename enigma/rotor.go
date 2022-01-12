@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type RotorSetup = struct {
+type RotorConfig = struct {
 	RotorType     RotorType
 	WheelPosition byte
 	RingPosition  int

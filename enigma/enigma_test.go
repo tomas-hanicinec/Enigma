@@ -1,7 +1,6 @@
 package enigma
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -111,88 +110,57 @@ func TestEnigma_Encode(t *testing.T) {
 
 // todo - error cases (config & encode errors)
 
-func createEnigma(model Model, reflectorConfig string, rotorConfig string, plugboardConfig string) (Enigma, error) {
-	e, err := NewEnigma(model)
-	if err != nil {
-		return Enigma{}, err
-	}
-
-	// todo - use global configuration methods
-	// Reflector
-	conf := strings.Split(reflectorConfig, "|")
-	refType := strings.TrimSpace(conf[0])
-	if refType != "" {
-		if err := e.ReflectorSelect(ReflectorType(refType)); err != nil {
-			return Enigma{}, fmt.Errorf("reflector select error: %w", err)
-		}
-	}
-
-	refPosition := strings.TrimSpace(conf[1])
-	if refPosition != "" {
-		if err := e.ReflectorSetWheel(refPosition[0]); err != nil {
-			return Enigma{}, fmt.Errorf("reflector set error: %w", err)
-		}
-	}
-
-	refWiring := strings.TrimSpace(conf[2])
-	if refWiring != "" {
-		if err := e.ReflectorRewire(refWiring); err != nil {
-			return Enigma{}, fmt.Errorf("reflector wiring error: %w", err)
-		}
-	}
+func createEnigma(model Model, reflectorConfigString string, rotorConfigString string, plugboardConfig string) (Enigma, error) {
 
 	// Rotors
-	conf = strings.Split(rotorConfig, "|")
-	rotorTypes := strings.TrimSpace(conf[0])
+	conf := strings.Split(rotorConfigString, "|")
+	rotorTypes := parseConfig(conf[0])
+	wheelPositions := parseConfig(conf[1])
+	ringPositions := parseConfig(conf[2])
+
 	slots := []RotorSlot{Fourth, Left, Middle, Right}
-	firstRotorSlotIndex := 0
-	if e.GetRotorCount() == 3 {
-		firstRotorSlotIndex = 1
+	firstSlotIndex := 0
+	if model.GetRotorCount() == 3 {
+		firstSlotIndex = 1
 	}
-	if rotorTypes != "" {
-		types := make(map[RotorSlot]RotorType)
-		i := firstRotorSlotIndex
-		for _, rType := range strings.Split(rotorTypes, " ") {
-			types[slots[i]] = RotorType(rType)
-			i++
+	rotorsConfig := make(map[RotorSlot]RotorConfig)
+	for si, i := firstSlotIndex, 0; si < len(slots); si, i = si+1, i+1 {
+		config := RotorConfig{}
+		if rotorTypes != nil {
+			config.RotorType = RotorType(rotorTypes[i])
 		}
-		if err := e.RotorsSelect(types); err != nil {
-			return Enigma{}, fmt.Errorf("rotor select error: %w", err)
+		if wheelPositions != nil {
+			config.WheelPosition = wheelPositions[i][0]
 		}
-	}
-
-	wheelConfig := strings.TrimSpace(conf[1])
-	if wheelConfig != "" {
-		i := firstRotorSlotIndex
-		for _, val := range strings.Split(wheelConfig, " ") {
-			if err := e.RotorSetWheel(slots[i], val[0]); err != nil {
-				return Enigma{}, fmt.Errorf("rotor %d wheel set error: %w", slots[i], err)
-			}
-			i++
+		if ringPositions != nil {
+			config.RingPosition, _ = strconv.Atoi(ringPositions[i])
 		}
+		rotorsConfig[slots[si]] = config
 	}
 
-	ringConfig := strings.TrimSpace(conf[2])
-	if ringConfig != "" {
-		i := firstRotorSlotIndex
-		for _, val := range strings.Split(ringConfig, " ") {
-			pos, err := strconv.Atoi(val)
-			if err != nil {
-				return Enigma{}, fmt.Errorf("invalid ring config %s: %w", val, err)
-			}
-			if err := e.RotorSetRing(slots[i], pos); err != nil {
-				return Enigma{}, fmt.Errorf("rotor %d ring set error: %w", slots[i], err)
-			}
-			i++
-		}
+	// Reflector
+	conf = strings.Split(reflectorConfigString, "|")
+	reflectorConfig := ReflectorConfig{}
+	refType := ReflectorType(strings.TrimSpace(conf[0]))
+	if refType != "" {
+		reflectorConfig.ReflectorType = refType
+	}
+	refPosition := strings.TrimSpace(conf[1])
+	if refPosition != "" {
+		reflectorConfig.WheelPosition = refPosition[0]
+	}
+	refWiring := strings.TrimSpace(conf[2])
+	if refWiring != "" {
+		reflectorConfig.Wiring = refWiring
 	}
 
-	// Plugboard
-	if plugboardConfig != "" {
-		if err := e.PlugboardSetup(plugboardConfig); err != nil {
-			return Enigma{}, fmt.Errorf("plugboard set error: %w", err)
-		}
-	}
+	return NewEnigmaWithSetup(model, rotorsConfig, reflectorConfig, plugboardConfig)
+}
 
-	return e, nil
+func parseConfig(configString string) []string {
+	trimmed := strings.TrimSpace(configString)
+	if trimmed == "" {
+		return nil
+	}
+	return strings.Split(trimmed, " ")
 }

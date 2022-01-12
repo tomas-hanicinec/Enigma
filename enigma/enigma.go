@@ -43,7 +43,7 @@ func NewEnigma(model Model) (Enigma, error) {
 	return e, nil
 }
 
-func NewEnigmaWithSetup(model Model, rotors map[RotorSlot]RotorSetup, reflector ReflectorSetup, plugboard string) (Enigma, error) {
+func NewEnigmaWithSetup(model Model, rotors map[RotorSlot]RotorConfig, reflector ReflectorConfig, plugboard string) (Enigma, error) {
 	e, err := NewEnigma(model)
 	if err != nil {
 		return Enigma{}, err
@@ -70,25 +70,25 @@ func NewEnigmaWithSetup(model Model, rotors map[RotorSlot]RotorSetup, reflector 
 
 // -------------------------------------- SETUP --------------------------------------
 
-func (e *Enigma) RotorsSetup(setup map[RotorSlot]RotorSetup) error {
+func (e *Enigma) RotorsSetup(config map[RotorSlot]RotorConfig) error {
 	types := map[RotorSlot]RotorType{}
-	for slot, rotorSetup := range setup {
-		types[slot] = rotorSetup.RotorType
+	for slot, rotorConfig := range config {
+		types[slot] = rotorConfig.RotorType
 	}
 	rotors, err := e.getRotors(types)
 	if err != nil {
-		return fmt.Errorf("failed to setup rotor types: %w", err)
+		return fmt.Errorf("failed to set rotor types: %w", err)
 	}
 
-	for slot, rotorSetup := range setup {
-		if rotorSetup.WheelPosition != 0 {
-			if err = rotors[e.rotorSlotToIndex(slot)].setWheelPosition(rotorSetup.WheelPosition); err != nil {
-				return fmt.Errorf("failed to set wheel position for rotor %s: %w", rotorSetup.RotorType, err)
+	for slot, rotorConfig := range config {
+		if rotorConfig.WheelPosition != 0 {
+			if err = rotors[e.rotorSlotToIndex(slot)].setWheelPosition(rotorConfig.WheelPosition); err != nil {
+				return fmt.Errorf("failed to set wheel position for rotor %s: %w", rotorConfig.RotorType, err)
 			}
 		}
-		if rotorSetup.RingPosition != 0 {
-			if err = rotors[e.rotorSlotToIndex(slot)].setRingPosition(rotorSetup.RingPosition); err != nil {
-				return fmt.Errorf("failed to set ring position for rotor %s: %w", rotorSetup.RotorType, err)
+		if rotorConfig.RingPosition != 0 {
+			if err = rotors[e.rotorSlotToIndex(slot)].setRingPosition(rotorConfig.RingPosition); err != nil {
+				return fmt.Errorf("failed to set ring position for rotor %s: %w", rotorConfig.RotorType, err)
 			}
 		}
 	}
@@ -158,21 +158,21 @@ func (e *Enigma) RotorSetRing(slot RotorSlot, position int) error {
 	return e.rotors[e.rotorSlotToIndex(slot)].setRingPosition(position)
 }
 
-func (e *Enigma) ReflectorSetup(setup ReflectorSetup) error {
-	ref, err := e.getReflector(setup.ReflectorType)
+func (e *Enigma) ReflectorSetup(config ReflectorConfig) error {
+	ref, err := e.getReflector(config.ReflectorType)
 	if err != nil {
 		return fmt.Errorf("failed to select reflector: %w", err)
 	}
 
-	if setup.WheelPosition != 0 {
-		if err = ref.setWheelPosition(setup.WheelPosition); err != nil {
+	if config.WheelPosition != 0 {
+		if err = ref.setWheelPosition(config.WheelPosition); err != nil {
 			return fmt.Errorf("failed to set reflector position: %w", err)
 		}
 	}
 
 	isWired := false
-	if setup.Wiring != "" {
-		if err = ref.setWiring(setup.Wiring); err != nil {
+	if config.Wiring != "" {
+		if err = ref.setWiring(config.Wiring); err != nil {
 			return fmt.Errorf("failed to rewire reflector: %w", err)
 		}
 		isWired = true
