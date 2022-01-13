@@ -45,22 +45,12 @@ func newReflector(reflectorType ReflectorType) reflector {
 }
 
 func (r *reflector) setWheelPosition(letter byte) error {
-	if len(r.reflectorType.getPositions()) <= 1 {
+	if !r.reflectorType.IsMovable() {
 		return fmt.Errorf("reflector %s is fixed, cannot change position", r.reflectorType)
 	}
 	index, ok := Alphabet.charToInt(letter)
 	if !ok {
-		return fmt.Errorf("invalid reflector position %s", string(letter))
-	}
-	supported := false
-	for _, pos := range r.reflectorType.getPositions() {
-		if pos == index {
-			supported = true
-			break
-		}
-	}
-	if !supported {
-		return fmt.Errorf("reflector %s does not support position %s", r.reflectorType, string(letter))
+		return fmt.Errorf("unsupported reflector position %s", string(letter))
 	}
 
 	r.wheelPosition = index

@@ -165,7 +165,11 @@ func (e *Enigma) RotorsReset() {
 }
 
 func (e *Enigma) ReflectorSetup(config ReflectorConfig) error {
-	ref, err := e.getReflector(config.ReflectorType)
+	reflectorType := config.ReflectorType
+	if reflectorType == "" {
+		reflectorType = e.reflector.reflectorType // use current if not specified
+	}
+	ref, err := e.getReflector(reflectorType)
 	if err != nil {
 		return fmt.Errorf("failed to select reflector: %w", err)
 	}

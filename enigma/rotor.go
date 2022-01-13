@@ -74,9 +74,6 @@ func (r *rotor) getWheelPosition() int {
 }
 
 func (r *rotor) setRingPosition(position int) error {
-	if !r.rotorType.HasRing() {
-		return fmt.Errorf("rotor %s does not have a movable ring", r.rotorType)
-	}
 	if position < 1 || position > Alphabet.getSize() {
 		return fmt.Errorf("invalid ring position %d, must be a number between 1 and %d", position, Alphabet.getSize())
 	}

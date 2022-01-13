@@ -65,15 +65,33 @@ func TestEnigma_Encode(t *testing.T) {
 			want: "KRHAIKWYFOKTFNNPVCDJAFHFUGNFNIILPGSIURPSCJUKRWKJNBOJFDNHNGVVEJMLFEGQOEMQKFHHCMLPCDMVDXOADJYQTVQWASKPCDSOFVVLIABJHVCEDRRGZVIKWDWCBVJXUZUMGZUEWFBWVDSMPXLYJKCQHLWCYNGTRUWUFWDHGAOPLNOAZIPNRYSGPZWHDYTUBYWBZZIS",
 		},
 		{
+			name: "Commercial",
+			fields: enigmaSpec{
+				model:           Commercial,
+				rotorConfig:     "III-K I-K II-K | G Z J | 6 18 4",
+				reflectorConfig: " | Y | ",
+			},
+			text: "WHENQQBLETCHLEYQQPARKQQWASQQFIRSTQQOPENEDQQASQQAQQMUSEUMQQAROUNDQQTWOQQTHOUSANDQQTHEYQQHADQQANQQENIGMAQQONQQDISPLAYQQTHATQQCOULDQQBEQQTOUCHEDQQBYQQTHEQQPUBLICQQITQQWASQQPARTQQOFQQTHEQQSOCALLEDQQCRYPTOQQTRAILQQTHATQQALLOWEDQQVISITORSQQTOQQFOLLOWQQTHEQQFLOWQQOFQQANQQENIGMAQQMESSAGE",
+			want: "ISZZXPSFLMUMSNFXOGHEQIINTXJCAHQLBRELBJWAQWRJIUWUJILFKOPUOLUEXOKVFXLQCOKGNKVHYLBGDRYNGOPVQWIXNVXHOYDEAULBABSTTTZMRCFGXVFSOFZQPKRQKGKREOAXYLCBCZRHMUIRCHCGCNQIEABYWSNWMHOJVQGHWZETBYKBWJMLPRWKMNDMMARELELXKEFIWREMOSJLFESCDCRVOWVVFAMDUAQBRFQLRILGAZYCEPIIZLSXMWPJJMLHRGGMWCYDCTKCEOQJGMZC",
+		},
+		{
 			name: "Swiss-K (movable reflector)",
 			fields: enigmaSpec{
 				model:           SwissK,
-				rotorConfig:     "II-K I-K III-K | A X L | 2 19 4",
-				reflectorConfig: "K | F | ",
-				plugboardConfig: "",
+				rotorConfig:     "II-SK I-SK III-SK | A X L | 2 19 4",
+				reflectorConfig: " | F | ",
 			},
 			text: "ALLQQENIGMAQQKQQMACHINESQQWEREQQDELIVEREDQQBYQQTHEQQGERMANSQQWITHQQTHEQQSTANDARDQQCOMMERCIALQQWHEELQQWIRINGQQALSOQQKNOWNQQFROMQQTHEQQENIGMAQQDQQSEEQQTHEQQTABLEQQBELOWQQIMMEDIATELYQQAFTERQQRECEPTIONQQHOWEVERQQTHEQQSWISSQQCHANGEDQQTHEQQWIRINGQQOFQQALLQQCIPHERQQWHEELS",
 			want: "MKXPZMCGHRSVAMKALKDJGSRJIKZRPPCFUHWOOBGXKAFQSRFFWMXOVWGVKUKJIJKWVGIGSYIUNYFACJOUGRTQIZSZRTNNHKNGHSIETRPWLKXLSMGOIBPZSYUPIECXWHINIJSRMBMJRJHOOEABFWJZHMXGCXICDNFNVLNIPJGDXIDVEHXSPGDMGEWCCYUGXXBIHJLUXTSMRKIZVDDGNDGLHJHOXVZSYOVPVCYOOBPFYVENEQQXGIXAILVHSSVXAZURPZMLCPFEJ",
+		},
+		{
+			name: "Tripitz",
+			fields: enigmaSpec{
+				model:       Tripitz,
+				rotorConfig: "III-T VIII-T I-T | W W W | 13 25 2",
+			},
+			text: "THEQQENIGMAQQTQQTIRPITZQQWASQQAQQSPECIALQQVERSIONQQOFQQTHEQQENIGMAQQKQQTHATQQWASQQMADEQQFORQQTHEQQJAPANESEQQARMYQQDURINGQQWWIIQQTHEQQWHEELSQQWEREQQWIREDQQDIFFERENTLYQQANDQQEACHQQHADQQFIVEQQTURNOVERQQNOTCHESQQQQTHEQQTABLEQQBELOWQQSHOWSQQTHEQQWIRINGQQOFQQTHEQQWHEELSQQTHEQQETWQQANDQQUKW",
+			want: "NSLLDBIGRLEJHUKZRVIOYXAPGYDZLIKWILEVAGJKXBJBQTMTKSHSHXPVCJYUWJFLPHSJQIGEUBIKHPBONFFBHYTSIHJCUDFOPNEYTVLBVCWIGXADLLZRFGHCNCYHMPYGFJONRBXMAQANGKXOLZLTXMVWHNZLQDNJQDLXGATRRNGOIHNQMKVYPJFUSAPIAQDHVJUATOXYFSNTVWEHIYXEXZJMGICNRLDKKNEAWGRHKDRNBCLSTJFXNZYBCEGBWCSRLCIRAOHYNHEDCEIZILFMTAPMGEFD",
 		},
 	}
 	for _, tt := range tests {
@@ -126,36 +144,38 @@ func TestEnigma_Decode(t *testing.T) {
 	}
 
 	for _, model := range models {
-		e, err := createEnigma(model.spec.model, model.spec.rotorConfig, model.spec.reflectorConfig, model.spec.plugboardConfig)
-		if err != nil {
-			t.Errorf("config error = %v", err)
-			return
-		}
-		for i, text := range texts {
-			e.RotorsReset()
-			encoded, err := e.Encode(Preprocess(text))
+		t.Run(model.name, func(t *testing.T) {
+			e, err := createEnigma(model.spec.model, model.spec.rotorConfig, model.spec.reflectorConfig, model.spec.plugboardConfig)
 			if err != nil {
+				t.Errorf("config error = %v", err)
+				return
+			}
+			for i, text := range texts {
+				e.RotorsReset()
+				encoded, err := e.Encode(Preprocess(text))
 				if err != nil {
-					t.Errorf("Encode() error while encoding = %v", err)
-					return
+					if err != nil {
+						t.Errorf("Encode() error while encoding = %v", err)
+						return
+					}
+				}
+
+				e.RotorsReset()
+				decoded, err := e.Encode(encoded)
+				if err != nil {
+					if err != nil {
+						t.Errorf("Encode() error while decoding = %v", err)
+						return
+					}
+				}
+
+				want := strings.ToUpper(text)
+				got := Postprocess(decoded)
+				if got != want {
+					t.Errorf("Enigma spec %s, text number %d encode-decode error\nwant = %v\n got = %v", model.name, i, want, got)
 				}
 			}
-
-			e.RotorsReset()
-			decoded, err := e.Encode(encoded)
-			if err != nil {
-				if err != nil {
-					t.Errorf("Encode() error while decoding = %v", err)
-					return
-				}
-			}
-
-			want := strings.ToUpper(text)
-			got := Postprocess(decoded)
-			if got != want {
-				t.Errorf("Enigma spec %s, text number %d encode-decode error\nwant = %v\n got = %v", model.name, i, want, got)
-			}
-		}
+		})
 	}
 }
 
@@ -189,19 +209,21 @@ func createEnigma(model Model, rotorConfigString string, reflectorConfigString s
 	}
 
 	// Reflector
-	conf = strings.Split(reflectorConfigString, "|")
 	reflectorConfig := ReflectorConfig{}
-	refType := ReflectorType(strings.TrimSpace(conf[0]))
-	if refType != "" {
-		reflectorConfig.ReflectorType = refType
-	}
-	refPosition := strings.TrimSpace(conf[1])
-	if refPosition != "" {
-		reflectorConfig.WheelPosition = refPosition[0]
-	}
-	refWiring := strings.TrimSpace(conf[2])
-	if refWiring != "" {
-		reflectorConfig.Wiring = refWiring
+	if reflectorConfigString != "" {
+		conf = strings.Split(reflectorConfigString, "|")
+		refType := ReflectorType(strings.TrimSpace(conf[0]))
+		if refType != "" {
+			reflectorConfig.ReflectorType = refType
+		}
+		refPosition := strings.TrimSpace(conf[1])
+		if refPosition != "" {
+			reflectorConfig.WheelPosition = refPosition[0]
+		}
+		refWiring := strings.TrimSpace(conf[2])
+		if refWiring != "" {
+			reflectorConfig.Wiring = refWiring
+		}
 	}
 
 	return NewEnigmaWithSetup(model, rotorsConfig, reflectorConfig, plugboardConfig)
