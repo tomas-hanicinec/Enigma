@@ -11,12 +11,13 @@ type RotorConfig = struct {
 }
 
 type rotor struct {
-	rotorType      RotorType
-	wiringMapIn    map[int]int // In = first pass through the rotors (from the plugboard to the reflector)
-	wiringMapOut   map[int]int // Out = second pass (from the reflector to the plugboard)
-	notchPositions []int
-	wheelPosition  int
-	ringPosition   int
+	rotorType            RotorType
+	wiringMapIn          map[int]int // In = first pass through the rotors (from the plugboard to the reflector)
+	wiringMapOut         map[int]int // Out = second pass (from the reflector to the plugboard)
+	notchPositions       []int
+	initialWheelPosition byte // necessary for rotor reset
+	wheelPosition        int
+	ringPosition         int
 }
 
 func newRotor(rotorType RotorType) rotor {
@@ -48,12 +49,13 @@ func newRotor(rotorType RotorType) rotor {
 	}
 
 	return rotor{
-		rotorType:      rotorType,
-		wiringMapIn:    in,
-		wiringMapOut:   out,
-		notchPositions: notchPositions,
-		wheelPosition:  0, // start on the first position by default
-		ringPosition:   1,
+		rotorType:            rotorType,
+		wiringMapIn:          in,
+		wiringMapOut:         out,
+		notchPositions:       notchPositions,
+		initialWheelPosition: Alphabet.intToChar(0),
+		wheelPosition:        0, // start on the first position by default
+		ringPosition:         1,
 	}
 }
 
@@ -63,7 +65,12 @@ func (r *rotor) setWheelPosition(letter byte) error {
 		return fmt.Errorf("unsupported rotor wheel position %s", string(letter))
 	}
 	r.wheelPosition = index
+	r.initialWheelPosition = letter
 	return nil
+}
+
+func (r *rotor) getWheelPosition() int {
+	return r.wheelPosition
 }
 
 func (r *rotor) setRingPosition(position int) error {
@@ -77,8 +84,10 @@ func (r *rotor) setRingPosition(position int) error {
 	return nil
 }
 
-func (r *rotor) getWheelPosition() int {
-	return r.wheelPosition
+func (r *rotor) reset() {
+	if err := r.setWheelPosition(r.initialWheelPosition); err != nil {
+		panic(fmt.Errorf("failed to reset rotor %s: %w", r.rotorType, err))
+	}
 }
 
 func (r *rotor) translateIn(input int) int {

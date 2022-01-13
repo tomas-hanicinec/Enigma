@@ -6,112 +6,162 @@ import (
 	"testing"
 )
 
+type enigmaSpec struct {
+	model           Model
+	rotorConfig     string // I IV VII | A U C | 1 14 3
+	reflectorConfig string // B | 15 | AA BB CC DD EE ...
+	plugboardConfig string // AA BB CC DD EE FF GG HH II JJ
+}
+
 func TestEnigma_Encode(t *testing.T) {
-	type fields struct {
-		model           Model
-		reflectorConfig string // B | 15 | AA BB CC DD EE ...
-		rotorConfig     string // I IV VII | A U C | 1 14 3
-		plugboardConfig string // AA BB CC DD EE FF GG HH II JJ
-	}
 	tests := []struct {
-		name          string
-		fields        fields
-		text          string
-		want          string
-		wantConfigErr bool
-		wantEncodeErr bool
+		name   string
+		fields enigmaSpec
+		text   string
+		want   string
 	}{
 		{
 			name: "basic M3 with double-stepping",
-			fields: fields{
+			fields: enigmaSpec{
 				model:           M3,
-				reflectorConfig: "B | | ",
 				rotorConfig:     "I II III | | ",
+				reflectorConfig: "B | | ",
 				plugboardConfig: "",
 			},
-			text:          strings.Repeat("A", 200),
-			want:          "BDZGOWCXLTKSBTMCDLPBMUQOFXYHCXTGYJFLINHNXSHIUNTHEORXPQPKOVHCBUBTZSZSOOSTGOTFSODBBZZLXLCYZXIFGWFDZEEQIBMGFJBWZFCKPFMGBXQCIVIBBRNCOCJUVYDKMVJPFMDRMTGLWFOZLXGJEYYQPVPBWNCKVKLZTCBDLDCTSNRCOOVPTGBVBBISGJSO",
-			wantConfigErr: false,
-			wantEncodeErr: false,
+			text: strings.Repeat("A", 200),
+			want: "BDZGOWCXLTKSBTMCDLPBMUQOFXYHCXTGYJFLINHNXSHIUNTHEORXPQPKOVHCBUBTZSZSOOSTGOTFSODBBZZLXLCYZXIFGWFDZEEQIBMGFJBWZFCKPFMGBXQCIVIBBRNCOCJUVYDKMVJPFMDRMTGLWFOZLXGJEYYQPVPBWNCKVKLZTCBDLDCTSNRCOOVPTGBVBBISGJSO",
 		},
 		{
 			name: "M3 with full settings",
-			fields: fields{
+			fields: enigmaSpec{
 				model:           M3,
-				reflectorConfig: "C | | ",
 				rotorConfig:     "III VII VIII | D U S | 12 8 6",
+				reflectorConfig: "C | | ",
 				plugboardConfig: "AI BX CU DF EN GQ HM JL KT OP",
 			},
-			text:          "LOREMQQIPSUMQQDOLORQQSITQQAMETQQCONSECTETUERQQADIPISCINGQQELITQQAENEANQQVELQQMASSAQQQUISQQMAURISQQVEHICULAQQLACINIAQQCURABITURQQSAGITTISQQHENDRERITQQANTEQQNAMQQQUISQQNULLAQQETIAMQQQUISQQQUAMQQALIQUAMQQINQQLOREMQQSITQQAMETQQLEOQQACCUMSANQQLACINIA",
-			want:          "JRKGDLRCOURDHDKHEEOOWVEJVPOOKOBHFFQXDNWDYEDDTKDWLRGLSJMBRRQYHQRUPUBVYHTIABJNKZYPRQVJXTXOZWOSIMQHDYWHUHKZGCVXDIYURDQGOIHNFMMDYMXDPFKXZQTXZMZGYOYBQKIFXPFSXHYBOWRSYQWLXHMIIEHUWPOJJSSBNOSCPELDEENEGTMXWZQRTXCKRQLGFQKBUOBKEBXVGWFYIRSFHBPRAWKIBEPLBMCEW",
-			wantConfigErr: false,
-			wantEncodeErr: false,
+			text: "LOREMQQIPSUMQQDOLORQQSITQQAMETQQCONSECTETUERQQADIPISCINGQQELITQQAENEANQQVELQQMASSAQQQUISQQMAURISQQVEHICULAQQLACINIAQQCURABITURQQSAGITTISQQHENDRERITQQANTEQQNAMQQQUISQQNULLAQQETIAMQQQUISQQQUAMQQALIQUAMQQINQQLOREMQQSITQQAMETQQLEOQQACCUMSANQQLACINIA",
+			want: "JRKGDLRCOURDHDKHEEOOWVEJVPOOKOBHFFQXDNWDYEDDTKDWLRGLSJMBRRQYHQRUPUBVYHTIABJNKZYPRQVJXTXOZWOSIMQHDYWHUHKZGCVXDIYURDQGOIHNFMMDYMXDPFKXZQTXZMZGYOYBQKIFXPFSXHYBOWRSYQWLXHMIIEHUWPOJJSSBNOSCPELDEENEGTMXWZQRTXCKRQLGFQKBUOBKEBXVGWFYIRSFHBPRAWKIBEPLBMCEW",
 		},
 		{
 			name: "M4 (4-rotors)",
-			fields: fields{
+			fields: enigmaSpec{
 				model:           M4,
-				reflectorConfig: "BThin | | ",
 				rotorConfig:     "gamma VI I VII | L X A Q | 18 16 23 2",
+				reflectorConfig: "BThin | | ",
 				plugboardConfig: "",
 			},
-			text:          "LOREMQQIPSUMQQDOLORQQSITQQAMETQQCONSECTETUERQQADIPISCINGQQELITQQAENEANQQVELQQMASSAQQQUISQQMAURISQQVEHICULAQQLACINIAQQCURABITURQQSAGITTISQQHENDRERITQQANTEQQNAMQQQUISQQNULLAQQETIAMQQQUISQQQUAMQQALIQUAMQQINQQLOREMQQSITQQAMETQQLEOQQACCUMSANQQLACINIA",
-			want:          "HZAFDYHADNXFLGTKODHHUCMCKFKFLOSTSMRPZNBLIZSYXGGTEGUHNQQEDLQHPWYYMGSGNEYVWTSSOULABUDOWBMDRKLDNOWUMBFXESNFHBEUIXFXGNUJBKWEYJUGMPXIXONQNKDWIIVOGCFACLZZXWKDRDKRRJXGYLCAPWSWWPWFFPICTUOVHPMUNXNKVRTPKWXDEXYGFWFPYYCDBZVKYCMGMCKDVLJOJJFFCSHGXYXZCPTBORTDL",
-			wantConfigErr: false,
-			wantEncodeErr: false,
+			text: "LOREMQQIPSUMQQDOLORQQSITQQAMETQQCONSECTETUERQQADIPISCINGQQELITQQAENEANQQVELQQMASSAQQQUISQQMAURISQQVEHICULAQQLACINIAQQCURABITURQQSAGITTISQQHENDRERITQQANTEQQNAMQQQUISQQNULLAQQETIAMQQQUISQQQUAMQQALIQUAMQQINQQLOREMQQSITQQAMETQQLEOQQACCUMSANQQLACINIA",
+			want: "HZAFDYHADNXFLGTKODHHUCMCKFKFLOSTSMRPZNBLIZSYXGGTEGUHNQQEDLQHPWYYMGSGNEYVWTSSOULABUDOWBMDRKLDNOWUMBFXESNFHBEUIXFXGNUJBKWEYJUGMPXIXONQNKDWIIVOGCFACLZZXWKDRDKRRJXGYLCAPWSWWPWFFPICTUOVHPMUNXNKVRTPKWXDEXYGFWFPYYCDBZVKYCMGMCKDVLJOJJFFCSHGXYXZCPTBORTDL",
 		},
 		{
 			name: "UKW-D (rewirable reflector)",
-			fields: fields{
+			fields: enigmaSpec{
 				model:           M4UKWD,
-				reflectorConfig: "D | | AQ BG CK DI EL FX HZ MW NV OT PU RS",
 				rotorConfig:     "I II III | D U Z | 17 5 8",
-				plugboardConfig: "", //"AB CD EF GI ZS WL QY JX MP VR",
+				reflectorConfig: "D | | AQ BG CK DI EL FX HZ MW NV OT PU RS",
+				plugboardConfig: "",
 			},
-			text:          "THERESQQTWOQQMISSINGQQPIECESQQFIRSTQQTHEQQRINGQQSETTINGQQCHANGESQQTHEQQOUTPUTQQLETTERQQITQQDOESNTQQROTATEQQTHEQQWHOLEQQEXITQQPATTERNQQSECONDQQTHEQQROTORSQQAREQQADVANCEDQQBEFOREQQTHEQQLETTERQQISQQENCRYPTED",
-			want:          "KRHAIKWYFOKTFNNPVCDJAFHFUGNFNIILPGSIURPSCJUKRWKJNBOJFDNHNGVVEJMLFEGQOEMQKFHHCMLPCDMVDXOADJYQTVQWASKPCDSOFVVLIABJHVCEDRRGZVIKWDWCBVJXUZUMGZUEWFBWVDSMPXLYJKCQHLWCYNGTRUWUFWDHGAOPLNOAZIPNRYSGPZWHDYTUBYWBZZIS",
-			wantConfigErr: false,
-			wantEncodeErr: false,
+			text: "THERESQQTWOQQMISSINGQQPIECESQQFIRSTQQTHEQQRINGQQSETTINGQQCHANGESQQTHEQQOUTPUTQQLETTERQQITQQDOESNTQQROTATEQQTHEQQWHOLEQQEXITQQPATTERNQQSECONDQQTHEQQROTORSQQAREQQADVANCEDQQBEFOREQQTHEQQLETTERQQISQQENCRYPTED",
+			want: "KRHAIKWYFOKTFNNPVCDJAFHFUGNFNIILPGSIURPSCJUKRWKJNBOJFDNHNGVVEJMLFEGQOEMQKFHHCMLPCDMVDXOADJYQTVQWASKPCDSOFVVLIABJHVCEDRRGZVIKWDWCBVJXUZUMGZUEWFBWVDSMPXLYJKCQHLWCYNGTRUWUFWDHGAOPLNOAZIPNRYSGPZWHDYTUBYWBZZIS",
 		},
 		{
 			name: "Swiss-K (movable reflector)",
-			fields: fields{
+			fields: enigmaSpec{
 				model:           SwissK,
-				reflectorConfig: "K | F | ",
 				rotorConfig:     "II-K I-K III-K | A X L | 2 19 4",
+				reflectorConfig: "K | F | ",
 				plugboardConfig: "",
 			},
-			text:          "ALLQQENIGMAQQKQQMACHINESQQWEREQQDELIVEREDQQBYQQTHEQQGERMANSQQWITHQQTHEQQSTANDARDQQCOMMERCIALQQWHEELQQWIRINGQQALSOQQKNOWNQQFROMQQTHEQQENIGMAQQDQQSEEQQTHEQQTABLEQQBELOWQQIMMEDIATELYQQAFTERQQRECEPTIONQQHOWEVERQQTHEQQSWISSQQCHANGEDQQTHEQQWIRINGQQOFQQALLQQCIPHERQQWHEELS",
-			want:          "MKXPZMCGHRSVAMKALKDJGSRJIKZRPPCFUHWOOBGXKAFQSRFFWMXOVWGVKUKJIJKWVGIGSYIUNYFACJOUGRTQIZSZRTNNHKNGHSIETRPWLKXLSMGOIBPZSYUPIECXWHINIJSRMBMJRJHOOEABFWJZHMXGCXICDNFNVLNIPJGDXIDVEHXSPGDMGEWCCYUGXXBIHJLUXTSMRKIZVDDGNDGLHJHOXVZSYOVPVCYOOBPFYVENEQQXGIXAILVHSSVXAZURPZMLCPFEJ",
-			wantConfigErr: false,
-			wantEncodeErr: false,
+			text: "ALLQQENIGMAQQKQQMACHINESQQWEREQQDELIVEREDQQBYQQTHEQQGERMANSQQWITHQQTHEQQSTANDARDQQCOMMERCIALQQWHEELQQWIRINGQQALSOQQKNOWNQQFROMQQTHEQQENIGMAQQDQQSEEQQTHEQQTABLEQQBELOWQQIMMEDIATELYQQAFTERQQRECEPTIONQQHOWEVERQQTHEQQSWISSQQCHANGEDQQTHEQQWIRINGQQOFQQALLQQCIPHERQQWHEELS",
+			want: "MKXPZMCGHRSVAMKALKDJGSRJIKZRPPCFUHWOOBGXKAFQSRFFWMXOVWGVKUKJIJKWVGIGSYIUNYFACJOUGRTQIZSZRTNNHKNGHSIETRPWLKXLSMGOIBPZSYUPIECXWHINIJSRMBMJRJHOOEABFWJZHMXGCXICDNFNVLNIPJGDXIDVEHXSPGDMGEWCCYUGXXBIHJLUXTSMRKIZVDDGNDGLHJHOXVZSYOVPVCYOOBPFYVENEQQXGIXAILVHSSVXAZURPZMLCPFEJ",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e, err := createEnigma(tt.fields.model, tt.fields.reflectorConfig, tt.fields.rotorConfig, tt.fields.plugboardConfig)
-			if (err != nil) != tt.wantConfigErr {
-				t.Errorf("config error = %v, wantErr %v", err, tt.wantConfigErr)
+			e, err := createEnigma(tt.fields.model, tt.fields.rotorConfig, tt.fields.reflectorConfig, tt.fields.plugboardConfig)
+			if err != nil {
+				t.Errorf("config error = %v", err)
 				return
 			}
 			got, err := e.Encode(tt.text)
-			if (err != nil) != tt.wantEncodeErr {
-				t.Errorf("Encode() error = %v, wantErr %v", err, tt.wantEncodeErr)
+			if err != nil {
+				t.Errorf("Encode() error = %v", err)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Encode()\nwant = %v\n got = %v", got, tt.want)
+				t.Errorf("Encode()\nwant = %v\n got = %v", tt.want, got)
 			}
 		})
 	}
 }
 
-// todo - encode -> decode (including preprocess + postprocess functions)
+func TestEnigma_Decode(t *testing.T) {
+	models := []struct {
+		name string
+		spec enigmaSpec
+	}{
+		{
+			name: "M3",
+			spec: enigmaSpec{
+				model:           M3,
+				rotorConfig:     "VI I V | B T H | 12 1 5",
+				reflectorConfig: "C | | ",
+				plugboardConfig: "AB CD EF GH IJ KL MN OP", // partial plug boards are allowed
+			},
+		},
+		{
+			name: "UKW-D",
+			spec: enigmaSpec{
+				model:           M4UKWD,
+				rotorConfig:     "II VIII I | Q N G | 11 11 9",
+				reflectorConfig: "D | | IQ HG CL DA NK FX BZ MW EV OR PU TS",
+				plugboardConfig: "ZY WV JF ES LO",
+			},
+		},
+	}
+	texts := []string{
+		"Simple text with punctuation, nothing special.",
+		"Words with special characters on edges, like complex,xerox, vixen opaque Everest, or quirk, or vast molotov. Yearly-yield is also very life-threatening.",
+		"The Enigma machine is a cipher device developed and used in the early to mid-twentieth century to protect commercial, diplomatic, and military communication. It was employed extensively by Nazi Germany during World War II, in all branches of the German military. The Enigma machine was considered so secure that it was used to encipher the most top-secret messages. The Enigma has an electromechanical rotor mechanism that scrambles the twenty-six letters of the alphabet. In typical use, one person enters text on the Enigmas keyboard and another person writes down which of twenty-six lights above the keyboard illuminated at each key press. If plain text is entered, the illuminated letters are the encoded ciphertext. Entering ciphertext transforms it back into readable plaintext. The rotor mechanism changes the electrical connections between the keys and the lights with each keypress. The security of the system depends on machine settings that were generally changed daily, based on secret key lists distributed in advance, and on other settings that were changed for each message. The receiving station would have to know and use the exact settings employed by the transmitting station to successfully decrypt a message. While Nazi Germany introduced a series of improvements to Enigma over the years, and these hampered decryption efforts, they did not prevent Poland from cracking the machine prior to the war, enabling the Allies to exploit Enigma-enciphered messages as a major source of intelligence. Many commentators say the flow of Ultra communications intelligence from the decryption of Enigma, Lorenz, and other ciphers, shortened the war substantially, and might even have altered its outcome.",
+	}
+
+	for _, model := range models {
+		e, err := createEnigma(model.spec.model, model.spec.rotorConfig, model.spec.reflectorConfig, model.spec.plugboardConfig)
+		if err != nil {
+			t.Errorf("config error = %v", err)
+			return
+		}
+		for i, text := range texts {
+			e.RotorsReset()
+			encoded, err := e.Encode(Preprocess(text))
+			if err != nil {
+				if err != nil {
+					t.Errorf("Encode() error while encoding = %v", err)
+					return
+				}
+			}
+
+			e.RotorsReset()
+			decoded, err := e.Encode(encoded)
+			if err != nil {
+				if err != nil {
+					t.Errorf("Encode() error while decoding = %v", err)
+					return
+				}
+			}
+
+			want := strings.ToUpper(text)
+			got := Postprocess(decoded)
+			if got != want {
+				t.Errorf("Enigma spec %s, text number %d encode-decode error\nwant = %v\n got = %v", model.name, i, want, got)
+			}
+		}
+	}
+}
 
 // todo - error cases (config & encode errors)
 
-func createEnigma(model Model, reflectorConfigString string, rotorConfigString string, plugboardConfig string) (Enigma, error) {
-
+func createEnigma(model Model, rotorConfigString string, reflectorConfigString string, plugboardConfig string) (Enigma, error) {
 	// Rotors
 	conf := strings.Split(rotorConfigString, "|")
 	rotorTypes := parseConfig(conf[0])

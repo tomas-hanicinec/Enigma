@@ -158,6 +158,12 @@ func (e *Enigma) RotorSetRing(slot RotorSlot, position int) error {
 	return e.rotors[e.rotorSlotToIndex(slot)].setRingPosition(position)
 }
 
+func (e *Enigma) RotorsReset() {
+	for slot := range e.rotors {
+		e.rotors[slot].reset()
+	}
+}
+
 func (e *Enigma) ReflectorSetup(config ReflectorConfig) error {
 	ref, err := e.getReflector(config.ReflectorType)
 	if err != nil {

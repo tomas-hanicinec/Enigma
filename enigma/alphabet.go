@@ -80,21 +80,39 @@ func getDefaultLetterMap() map[int]int {
 	return letterMap
 }
 
+// these are optimized for english language (the "to" letter pairs almost never occur in common english)
+var substitutions = []struct {
+	from string
+	to   string
+}{
+	{"Q ", "QW "},
+	{" Q", " WQ"},
+	{" ", "QQ"},
+	{"X,", "XW,"},
+	{",X", ",WX"},
+	{",", "XX"},
+	{"V.", "VW."},
+	{".V", ".WV"},
+	{".", "VV"},
+	{"Y-", "YQ-"},
+	{"-Y", "-QY"},
+	{"-", "YY"},
+}
+
 func Preprocess(text string) string {
 	text = strings.ToUpper(text) // convert to uppercase
 	// replace punctuations with double letters
-	// todo - do this more elaborately (currently COMPLEX PROCEDURE -> COMPLE XPROCEDURE)
-	text = strings.ReplaceAll(text, " ", "XX")
-	text = strings.ReplaceAll(text, ".", "YY")
-	text = strings.ReplaceAll(text, ",", "ZZ")
+	for _, sub := range substitutions {
+		text = strings.ReplaceAll(text, sub.from, sub.to)
+	}
 
 	return text
 }
 
 func Postprocess(text string) string {
-	// convert back the punctuation
-	text = strings.ReplaceAll(text, "XX", " ")
-	text = strings.ReplaceAll(text, "YY", ".")
-	text = strings.ReplaceAll(text, "ZZ", ",")
+	// convert the punctuations back
+	for i := len(substitutions) - 1; i >= 0; i-- {
+		text = strings.ReplaceAll(text, substitutions[i].to, substitutions[i].from)
+	}
 	return text
 }
