@@ -62,7 +62,7 @@ func newRotor(rotorType RotorType) rotor {
 func (r *rotor) setWheelPosition(letter byte) error {
 	index, ok := Alphabet.charToInt(letter)
 	if !ok {
-		return fmt.Errorf("unsupported rotor wheel position %s", string(letter))
+		return fmt.Errorf("unsupported rotor wheel position \"%s\"", string(letter))
 	}
 	r.wheelPosition = index
 	r.initialWheelPosition = letter

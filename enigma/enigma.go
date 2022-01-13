@@ -49,8 +49,10 @@ func NewEnigmaWithSetup(model Model, rotors map[RotorSlot]RotorConfig, reflector
 		return Enigma{}, err
 	}
 
-	if err := e.RotorsSetup(rotors); err != nil {
-		return Enigma{}, fmt.Errorf("failed to setup rotors: %w", err)
+	if len(rotors) > 0 {
+		if err := e.RotorsSetup(rotors); err != nil {
+			return Enigma{}, fmt.Errorf("failed to setup rotors: %w", err)
+		}
 	}
 
 	if !reflector.isEmpty() {
@@ -72,7 +74,13 @@ func NewEnigmaWithSetup(model Model, rotors map[RotorSlot]RotorConfig, reflector
 
 func (e *Enigma) RotorsSetup(config map[RotorSlot]RotorConfig) error {
 	types := map[RotorSlot]RotorType{}
+	for i, rotor := range e.rotors {
+		types[e.rotorIndexToSlot(i)] = rotor.rotorType // fill with current values
+	}
 	for slot, rotorConfig := range config {
+		if err := e.validateRotorSlot(slot); err != nil {
+			return err
+		}
 		types[slot] = rotorConfig.RotorType
 	}
 	rotors, err := e.getRotors(types)
@@ -123,9 +131,9 @@ func (e *Enigma) getRotors(rotorTypes map[RotorSlot]RotorType) ([]rotor, error) 
 		if _, ok := isDuplicateType[rotorType]; ok {
 			return nil, fmt.Errorf("cannot select the rotor %s twice", rotorType)
 		}
-		// can only populate as many slots as the current model supports
-		if int(slot) >= e.GetRotorCount() {
-			return nil, fmt.Errorf("cannot select rotor for slot number %d, %s model only has %d rotors", slot, e.GetName(), e.GetRotorCount())
+		// can only populate slots supported by the current model
+		if err := e.validateRotorSlot(slot); err != nil {
+			return nil, err
 		}
 		// handle 4th rotor (only 2 rotors can fit to the 4th slot and vice-versa)
 		isFourth := slot == Fourth
@@ -229,7 +237,7 @@ func (e *Enigma) ReflectorRewire(wiring string) error {
 
 func (e *Enigma) PlugboardSetup(plugConfig string) error {
 	if !e.HasPlugboard() {
-		return fmt.Errorf("%s model does not have plugboard, cannot set", e.GetName())
+		return fmt.Errorf("%s model does not have a plugboard", e.GetName())
 	}
 	return e.plugboard.setup(plugConfig)
 }
@@ -301,7 +309,7 @@ func (e *Enigma) doEncode(text string) (string, []EncryptionSequence, error) {
 	for i, letter := range text {
 		sequence, err := e.translate(byte(letter))
 		if err != nil {
-			return "", nil, fmt.Errorf("failed to encode letter [%s]: %w", string(letter), err)
+			return "", nil, fmt.Errorf("failed to encode letter \"%s\": %w", string(letter), err)
 		}
 		result[i] = sequence.GetResult()
 		sequences[i] = sequence

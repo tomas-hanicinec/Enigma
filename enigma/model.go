@@ -2,6 +2,14 @@ package enigma
 
 import "fmt"
 
+type etwWiring string
+
+const (
+	etwAbcdef  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	etwQwertz  = "QWERTZUIOASDFGHJKPYXCVBNML"
+	etwTripitz = "KZROUQHYAIGBLWVSTDXFPNMCJE"
+)
+
 type Model string
 
 const (
@@ -12,14 +20,6 @@ const (
 	M4UKWD     Model = "M4-UKW-D"
 	SwissK     Model = "Swiss-K"
 	Tripitz    Model = "Tripitz"
-)
-
-type etwWiring string
-
-const (
-	etwAbcdef  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	etwQwertz  = "QWERTZUIOASDFGHJKPYXCVBNML"
-	etwTripitz = "KZROUQHYAIGBLWVSTDXFPNMCJE"
 )
 
 func GetModels() []Model {

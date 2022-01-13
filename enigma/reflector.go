@@ -72,7 +72,7 @@ func (r *reflector) setWiring(wiring string) error {
 	pairs := strings.Split(wiring, " ")
 	expectedSize := Alphabet.getSize()/2 - 1
 	if len(pairs) != expectedSize {
-		return fmt.Errorf("incomplete wiring of the reflector, must include %d pairs to cover the whole alphabet", expectedSize)
+		return fmt.Errorf("incomplete wiring of the reflector, must include %d distinct pairs to cover the whole alphabet", expectedSize)
 	}
 	for _, pair := range pairs {
 		// validate the pair
@@ -90,7 +90,11 @@ func (r *reflector) setWiring(wiring string) error {
 			}
 			letters[i] = index
 			if mapped, ok := wiringMap[letters[i]]; ok && mapped != letters[i] {
-				return fmt.Errorf("invalid pair %s, letter %s (%s) already wired", pair, string(pair[i]), string(ukwdOrder[index]))
+				if pair[i] == 'Y' || pair[i] == 'J' {
+					return fmt.Errorf("invalid pair %s, letters Y and J are hard-wired in UKW-D reflectors and cannot be changed", pair)
+				} else {
+					return fmt.Errorf("invalid pair %s, letter %s already wired", pair, string(pair[i]))
+				}
 			}
 		}
 

@@ -15,14 +15,14 @@ type enigmaSpec struct {
 
 func TestEnigma_Encode(t *testing.T) {
 	tests := []struct {
-		name   string
-		fields enigmaSpec
-		text   string
-		want   string
+		name string
+		spec enigmaSpec
+		text string
+		want string
 	}{
 		{
 			name: "basic M3 with double-stepping",
-			fields: enigmaSpec{
+			spec: enigmaSpec{
 				model:           M3,
 				rotorConfig:     "I II III | | ",
 				reflectorConfig: "B | | ",
@@ -33,7 +33,7 @@ func TestEnigma_Encode(t *testing.T) {
 		},
 		{
 			name: "M3 with full settings",
-			fields: enigmaSpec{
+			spec: enigmaSpec{
 				model:           M3,
 				rotorConfig:     "III VII VIII | D U S | 12 8 6",
 				reflectorConfig: "C | | ",
@@ -44,7 +44,7 @@ func TestEnigma_Encode(t *testing.T) {
 		},
 		{
 			name: "M4 (4-rotors)",
-			fields: enigmaSpec{
+			spec: enigmaSpec{
 				model:           M4,
 				rotorConfig:     "gamma VI I VII | L X A Q | 18 16 23 2",
 				reflectorConfig: "BThin | | ",
@@ -55,7 +55,7 @@ func TestEnigma_Encode(t *testing.T) {
 		},
 		{
 			name: "UKW-D (rewirable reflector)",
-			fields: enigmaSpec{
+			spec: enigmaSpec{
 				model:           M4UKWD,
 				rotorConfig:     "I II III | D U Z | 17 5 8",
 				reflectorConfig: "D | | AQ BG CK DI EL FX HZ MW NV OT PU RS",
@@ -66,7 +66,7 @@ func TestEnigma_Encode(t *testing.T) {
 		},
 		{
 			name: "Commercial",
-			fields: enigmaSpec{
+			spec: enigmaSpec{
 				model:           Commercial,
 				rotorConfig:     "III-K I-K II-K | G Z J | 6 18 4",
 				reflectorConfig: " | Y | ",
@@ -76,7 +76,7 @@ func TestEnigma_Encode(t *testing.T) {
 		},
 		{
 			name: "Swiss-K (movable reflector)",
-			fields: enigmaSpec{
+			spec: enigmaSpec{
 				model:           SwissK,
 				rotorConfig:     "II-SK I-SK III-SK | A X L | 2 19 4",
 				reflectorConfig: " | F | ",
@@ -86,7 +86,7 @@ func TestEnigma_Encode(t *testing.T) {
 		},
 		{
 			name: "Tripitz",
-			fields: enigmaSpec{
+			spec: enigmaSpec{
 				model:       Tripitz,
 				rotorConfig: "III-T VIII-T I-T | W W W | 13 25 2",
 			},
@@ -96,18 +96,18 @@ func TestEnigma_Encode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e, err := createEnigma(tt.fields.model, tt.fields.rotorConfig, tt.fields.reflectorConfig, tt.fields.plugboardConfig)
+			e, err := createEnigma(tt.spec.model, tt.spec.rotorConfig, tt.spec.reflectorConfig, tt.spec.plugboardConfig)
 			if err != nil {
 				t.Errorf("config error = %v", err)
 				return
 			}
 			got, err := e.Encode(tt.text)
 			if err != nil {
-				t.Errorf("Encode() error = %v", err)
+				t.Errorf("encode error = %v", err)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Encode()\nwant = %v\n got = %v", tt.want, got)
+				t.Errorf("want = %v\n got = %v", tt.want, got)
 			}
 		})
 	}
@@ -155,7 +155,7 @@ func TestEnigma_Decode(t *testing.T) {
 				encoded, err := e.Encode(Preprocess(text))
 				if err != nil {
 					if err != nil {
-						t.Errorf("Encode() error while encoding = %v", err)
+						t.Errorf("encode error = %v", err)
 						return
 					}
 				}
@@ -164,7 +164,7 @@ func TestEnigma_Decode(t *testing.T) {
 				decoded, err := e.Encode(encoded)
 				if err != nil {
 					if err != nil {
-						t.Errorf("Encode() error while decoding = %v", err)
+						t.Errorf("encode error while decoding = %v", err)
 						return
 					}
 				}
@@ -179,39 +179,174 @@ func TestEnigma_Decode(t *testing.T) {
 	}
 }
 
-// todo - error cases (config & encode errors)
+func TestEnigma_ConfigurationError(t *testing.T) {
+	tests := []struct {
+		name string
+		spec enigmaSpec
+	}{
+		{
+			name: "unsupported model",
+			spec: enigmaSpec{"M5", "", "", ""},
+		},
+		{
+			name: "unsupported rotor",
+			spec: enigmaSpec{M3, "I II I-K | |", "", ""},
+		},
+		{
+			name: "unsupported 4th rotor",
+			spec: enigmaSpec{M4, "V I II III | |", "", ""},
+		},
+		{
+			name: "duplicate rotor type",
+			spec: enigmaSpec{M3, "I II II | |", "", ""},
+		},
+		{
+			name: "invalid rotor wheel position",
+			spec: enigmaSpec{M3, "I II III | A X x | 1 2 3", "", ""},
+		},
+		{
+			name: "invalid rotor ring position",
+			spec: enigmaSpec{M3, "I II III | A B C | 27 6 12", "", ""},
+		},
+		{
+			name: "unsupported reflector",
+			spec: enigmaSpec{Commercial, "", "B | |", ""},
+		},
+		{
+			name: "unsupported reflector position",
+			spec: enigmaSpec{M3, "", "B | X |", ""},
+		},
+		{
+			name: "invalid reflector position",
+			spec: enigmaSpec{M4, "", "B | x |", ""},
+		},
+		{
+			name: "unsupported reflector wiring",
+			spec: enigmaSpec{M3, "", "B | | AQ BG CK DI EL FX HZ MW NV OT PU RS", ""},
+		},
+		{
+			name: "invalid reflector wiring (wrong format)",
+			spec: enigmaSpec{M4UKWD, "", "D | | AQB BG CK DI EL FX HZ MW NV OT PU RS", ""},
+		},
+		{
+			name: "invalid reflector wiring (incomplete)",
+			spec: enigmaSpec{M4UKWD, "", "D | | AQ BG CK", ""},
+		},
+		{
+			name: "invalid reflector wiring (unsupported letter)",
+			spec: enigmaSpec{M4UKWD, "", "D | | AQ BG cK DI EL FX HZ MW NV OT PU RS", ""},
+		},
+		{
+			name: "invalid reflector wiring (fixed letter)",
+			spec: enigmaSpec{M4UKWD, "", "D | | YJ BG CK DI EL FX HZ MW NV OT PU RS", ""},
+		},
+		{
+			name: "invalid reflector wiring (duplicate)",
+			spec: enigmaSpec{M4UKWD, "", "D | | AQ BQ CK DI EL FX HZ MW NV OT PU RS", ""},
+		},
+		{
+			name: "unsupported plugboard",
+			spec: enigmaSpec{SwissK, "", "", "AB CD EF"},
+		},
+		{
+			name: "invalid plugboard wiring (wrong format)",
+			spec: enigmaSpec{M3, "", "", "ABC DE FG"},
+		},
+		{
+			name: "invalid plugboard wiring (unsupported letter)",
+			spec: enigmaSpec{M3, "", "", "Ai BX CU DF EN GQ HM JL KT OP"},
+		},
+		{
+			name: "invalid plugboard wiring (duplicate)",
+			spec: enigmaSpec{M4, "", "", "AI AI CU DF EN GQ HM JL KT OP"},
+		},
+		{
+			name: "invalid plugboard wiring (to itself)",
+			spec: enigmaSpec{M4, "", "", "AA BX CU DF EN GQ HM JL KT OP"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := createEnigma(tt.spec.model, tt.spec.rotorConfig, tt.spec.reflectorConfig, tt.spec.plugboardConfig)
+			if err == nil {
+				t.Errorf("expected config error, got none")
+			}
+		})
+	}
+}
+
+func TestEnigma_EncodeAlphabet(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+	}{
+		{
+			name: "unsupported letter",
+			text: "SOMEQQTEXTQQWTIHQQINVALIDČQQLETTER",
+		},
+		{
+			name: "number",
+			text: "INQQTHEQQ1STQQCENTURY",
+		},
+		{
+			name: "unsupported symbol",
+			text: "PUNCTUATION.ISQQNOTQQSUPPORTED",
+		},
+		{
+			name: "unsupported symbol with preprocess",
+			text: Preprocess("Only some basic punctuation symbols are supported by Preprocess()."),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e, err := createEnigma(M3, "I II III | B C D | 3 4 5", "C | |", "AB CD EF")
+			if err != nil {
+				t.Errorf("config error = %v", err)
+				return
+			}
+
+			_, err = e.Encode(tt.text)
+			if err == nil {
+				t.Errorf("expected encode error, got none")
+			}
+		})
+	}
+}
 
 func createEnigma(model Model, rotorConfigString string, reflectorConfigString string, plugboardConfig string) (Enigma, error) {
 	// Rotors
-	conf := strings.Split(rotorConfigString, "|")
-	rotorTypes := parseConfig(conf[0])
-	wheelPositions := parseConfig(conf[1])
-	ringPositions := parseConfig(conf[2])
-
-	slots := []RotorSlot{Fourth, Left, Middle, Right}
-	firstSlotIndex := 0
-	if model.GetRotorCount() == 3 {
-		firstSlotIndex = 1
-	}
 	rotorsConfig := make(map[RotorSlot]RotorConfig)
-	for si, i := firstSlotIndex, 0; si < len(slots); si, i = si+1, i+1 {
-		config := RotorConfig{}
-		if rotorTypes != nil {
-			config.RotorType = RotorType(rotorTypes[i])
+	if rotorConfigString != "" {
+		conf := strings.Split(rotorConfigString, "|")
+		rotorTypes := parseConfig(conf[0])
+		wheelPositions := parseConfig(conf[1])
+		ringPositions := parseConfig(conf[2])
+
+		slots := []RotorSlot{Fourth, Left, Middle, Right}
+		firstSlotIndex := 0
+		if model.GetRotorCount() == 3 {
+			firstSlotIndex = 1
 		}
-		if wheelPositions != nil {
-			config.WheelPosition = wheelPositions[i][0]
+		for si, i := firstSlotIndex, 0; si < len(slots); si, i = si+1, i+1 {
+			config := RotorConfig{}
+			if rotorTypes != nil {
+				config.RotorType = RotorType(rotorTypes[i])
+			}
+			if wheelPositions != nil {
+				config.WheelPosition = wheelPositions[i][0]
+			}
+			if ringPositions != nil {
+				config.RingPosition, _ = strconv.Atoi(ringPositions[i])
+			}
+			rotorsConfig[slots[si]] = config
 		}
-		if ringPositions != nil {
-			config.RingPosition, _ = strconv.Atoi(ringPositions[i])
-		}
-		rotorsConfig[slots[si]] = config
 	}
 
 	// Reflector
 	reflectorConfig := ReflectorConfig{}
 	if reflectorConfigString != "" {
-		conf = strings.Split(reflectorConfigString, "|")
+		conf := strings.Split(reflectorConfigString, "|")
 		refType := ReflectorType(strings.TrimSpace(conf[0]))
 		if refType != "" {
 			reflectorConfig.ReflectorType = refType
