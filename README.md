@@ -1,4 +1,4 @@
-# Universal Enigma emulator  [![Go Report Card](https://goreportcard.com/report/github.com/tomas-hanicinec/enigma)](https://goreportcard.com/report/github.com/tomas-hanicinec/enigma)
+# Universal Enigma emulator [![Go Report Card](https://goreportcard.com/badge/github.com/tomas-hanicinec/enigma)](https://goreportcard.com/report/github.com/tomas-hanicinec/enigma)
 
 Configurable library for emulating the Enigma ciphering machine. Basic usage:
 
