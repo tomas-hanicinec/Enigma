@@ -39,23 +39,23 @@ for _, model := range enigma.GetSupportedModels() {
 
 ## Accepted inputs
 
-Enigma machines can only encode **uppercase letters from the basic 26-letter alphabet**. This in practice led to various letter substitutions being used for common unsupported symbols like spaces and comas. One such substitution is provided by the `Preprocess()` function (and its complementary `Postprocess()`), that handle letter case, spaces and characters `.`, `,` and `-`.
+Enigma machines can only encode **uppercase letters from the basic 26-letter alphabet**. This in practice led to various letter substitutions being used for common unsupported symbols like spaces and comas. One such substitution is provided by the `Preprocess()` function (and its complementary `Postprocess()`). It handles letter case, spaces and characters `.`, `,` and `-`.
 
 **A few examples of unsupported texts**:
 * `Friday` - lowercase letters, use `enigma.Preprocess("Friday")`
 * `FRIDAY AFTERNOON.` - space and comma, use `enigma.Preprocess("FRIDAY AFTERNOON")`
-* `FRIDAY (AFTERNOON)` - brackets not supported, remove/replace them
+* `FRIDAY (AFTERNOON)` - brackets not supported, remove or replace them
 * `FRIDAY 24TH` - numbers not supported, remove or spell them out
 * `PÈRE NOËL` - diacritics not supported, convert to plain letters
 
-*Note on the substitutions used by `Preprocess()` and `Postprocess()` - they are optimized for common English language and might not work properly for some arbitrary character sequences or different languages, where the letter pairs used for substitutions ar more common. For example hyphen is substituted by `YY`, so a "word" `BAYYES-NET` would become `BAYYESYYNET` after preprocess and `BA-ES-NET` after postprocess, which is not the original word. Collisions like this would still be very rare though.*
+*Note on the substitutions used by `Preprocess()` and `Postprocess()` - they are optimized for common English language and might not work properly for some arbitrary character sequences or different languages, where the letter pairs used for substitutions are more common. For example hyphen is substituted by `YY`, so a "word" `BAYYES-NET` would become `BAYYESYYNET` after preprocess and `BA-ES-NET` after postprocess, which is not the original word. Collisions like this would still be very rare though.*
 
 ## Setup & configuration
 
 Every Enigma model starts with a valid default configuration out of the box and is ready to start encoding. However, the configuration for all models still can (and should) be changed. This can be done on three different levels:
 
 ### "Local" configuration (changing just one thing)
-When we already have a working Enigma model and want to tweak it (ie when trying to break the code).
+When we already have a working Enigma model and want to tweak it (ie. when trying to break the code).
 ```go
 e, err := enigma.NewEnigma(enigma.M4)
 
@@ -65,7 +65,7 @@ rotorTypes := map[enigma.RotorSlot]enigma.RotorType{}
 for _, slot := range e.GetAvailableRotorSlots() {
 	for _, availableType := range e.GetAvailableRotors(slot) {
 		if _, ok := placedRotorTypes[availableType]; !ok {
-			rotorTypes[slot] = availableType // use the first available unused rotor type
+			rotorTypes[slot] = availableType // use the first available unused
 			placedRotorTypes[availableType] = struct{}{}
 			break
 		}
@@ -79,13 +79,13 @@ err = e.RotorSetRing(enigma.Middle, 5)    // allowed rotor ring positions: 1-26
 
 // reflector changes
 reflectors := e.GetAvailableReflectors()
-err = e.ReflectorSelect(reflectors[0]) // select reflector (must be supported by the current model)
+err = e.ReflectorSelect(reflectors[0]) // select supported reflector
 if e.GetReflectorType().IsMovable() {
     // this means the reflector can be rotated 
 	err = e.ReflectorSetWheel(15) // allowed reflector wheel positions: 1-26
 } else if e.GetReflectorType().IsRewirable() {
-	// this means the UKW-D rewirable reflector 
-	err = e.ReflectorRewire("AB CD EF ") // UKW-D reflectors are a bit special - see the note bellow
+	// UKW-D rewirable reflector (about the configuration format see the note bellow)
+	err = e.ReflectorRewire("AV BO CT DM EZ FN GX HQ IS KR LU PW") 
 }
 
 if e.HasPlugboard() {
@@ -107,7 +107,7 @@ err = e.RotorsSetup(map[enigma.RotorSlot]enigma.RotorConfig{
         RingPosition:  12,
     },
     enigma.Middle: {enigma.Rotor_IIIK, 'Q', 10},  // one liner
-    enigma.Left:   {RotorType: enigma.Rotor_IIK}, // just type set, rest is on default
+    enigma.Left:   {RotorType: enigma.Rotor_IIK}, // just the type set, rest is on default
 })
 
 // set up the reflector
@@ -135,10 +135,10 @@ e, err := enigma.NewEnigmaWithSetup(
 
 ## Note on plugboard and UKW-D configuration
 
-**Plugboards** are configured by a string containing pairs of uppercase letters. Each pair represents one plug, so there is maximum of 13 pairs in a valid configuration (no letter can be plugged twice and no letter connects to itself). Partial configurations are allowed (not all plugs connected).
+**Plugboards** are configured by a string containing pairs of uppercase letters, for example `AB CD EF GH`. Each pair represents one plug, so there is a maximum of 13 pairs in a valid configuration (no letter can be plugged twice and no letter can be plugged to itself). Partial configurations are allowed (not all plugs connected).
 
-**UKW-D reflectors** are configured similarly by pairs of connected uppercase letters. There are a few differences though due to how these reflectors functioned in real life:
-* Letters Y and J were always hardwired together, so it is not possible to use these letters in any explicit configuration
-* Partial configurations are not allowed, all letters (except Y and J) must be explicitly connected
-* UKW-D configuration is therefore always a string of 12 uppercase letter pairs with no letters repeating
+**UKW-D reflectors** are configured similarly by pairs of connected uppercase letters. There are a few differences though due to how these reflectors worked in real life:
+* Letters Y and J were always hardwired together, so it is not possible to use these letters in any pair
+* Partial configurations are not allowed, all letters (except Y and J) must be present in a valid configuration
+* Valid UKW-D configuration is therefore always a string of 12 uppercase letter pairs with no letters repeating and Y and J missing
 
