@@ -42,8 +42,8 @@ func (r RotorType) getNotchPositions() []byte {
 	return rotorDefinitions[r].notchPositions
 }
 
-func (r RotorType) CanBeFourth() bool {
-	return rotorDefinitions[r].canBeFourth
+func (r RotorType) IsThin() bool {
+	return rotorDefinitions[r].isThin
 }
 
 func (r RotorType) getWiring() string {
@@ -52,133 +52,133 @@ func (r RotorType) getWiring() string {
 
 type rotorDefinition struct {
 	notchPositions []byte
-	canBeFourth    bool
+	isThin         bool
 	wiring         string
 }
 
 var rotorDefinitions = map[RotorType]rotorDefinition{
 	Rotor_IK: {
 		notchPositions: []byte{'Y'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "LPGSZMHAEOQKVXRFYBUTNICJDW",
 	},
 	Rotor_IIK: {
 		notchPositions: []byte{'E'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "SLVGBTFXJQOHEWIRZYAMKPCNDU",
 	},
 	Rotor_IIIK: {
 		notchPositions: []byte{'N'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "CJGDPSHKTURAWZXFMYNQOBVLIE",
 	},
 
 	Rotor_I: {
 		notchPositions: []byte{'Q'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
 	},
 	Rotor_II: {
 		notchPositions: []byte{'E'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "AJDKSIRUXBLHWTMCQGZNPYFVOE",
 	},
 	Rotor_III: {
 		notchPositions: []byte{'V'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "BDFHJLCPRTXVZNYEIWGAKMUSQO",
 	},
 	Rotor_IV: {
 		notchPositions: []byte{'J'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "ESOVPZJAYQUIRHXLNFTGKDCMWB",
 	},
 	Rotor_V: {
 		notchPositions: []byte{'Z'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "VZBRGITYUPSDNHLXAWMJQOFECK",
 	},
 	Rotor_VI: {
 		notchPositions: []byte{'Z', 'M'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "JPGVOUMFYQBENHZRDKASXLICTW",
 	},
 	Rotor_VII: {
 		notchPositions: []byte{'Z', 'M'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "NZJHGRCXMYSWBOUFAIVLPEKQDT",
 	},
 	Rotor_VIII: {
 		notchPositions: []byte{'Z', 'M'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "FKQHTLXOCBJSPDZRAMEWNIUYGV",
 	},
 
 	Rotor_beta: {
 		notchPositions: []byte{},
-		canBeFourth:    true,
+		isThin:         true,
 		wiring:         "LEYJVCNIXWPBQMDRTAKZGFUHOS",
 	},
 	Rotor_gamma: {
 		notchPositions: []byte{},
-		canBeFourth:    true,
+		isThin:         true,
 		wiring:         "FSOKANUERHMBTIYCWLQPZXVGJD",
 	},
 
 	Rotor_ISK: {
 		notchPositions: []byte{'Y'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "PEZUOHXSCVFMTBGLRINQJWAYDK",
 	},
 	Rotor_IISK: {
 		notchPositions: []byte{'E'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "ZOUESYDKFWPCIQXHMVBLGNJRAT",
 	},
 	Rotor_IIISK: {
 		notchPositions: []byte{'N'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "EHRVXGAOBQUSIMZFLYNWKTPDJC",
 	},
 
 	Rotor_IT: {
 		notchPositions: []byte{'W', 'Z', 'E', 'K', 'Q'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "KPTYUELOCVGRFQDANJMBSWHZXI",
 	},
 	Rotor_IIT: {
 		notchPositions: []byte{'W', 'Z', 'F', 'L', 'R'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "UPHZLWEQMTDJXCAKSOIGVBYFNR",
 	},
 	Rotor_IIIT: {
 		notchPositions: []byte{'W', 'Z', 'E', 'K', 'Q'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "QUDLYRFEKONVZAXWHMGPJBSICT",
 	},
 	Rotor_IVT: {
 		notchPositions: []byte{'W', 'Z', 'F', 'L', 'R'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "CIWTBKXNRESPFLYDAGVHQUOJZM",
 	},
 	Rotor_VT: {
 		notchPositions: []byte{'Y', 'C', 'F', 'K', 'R'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "UAXGISNJBVERDYLFZWTPCKOHMQ",
 	},
 	Rotor_VIT: {
 		notchPositions: []byte{'X', 'E', 'I', 'M', 'Q'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "XFUZGALVHCNYSEWQTDMRBKPIOJ",
 	},
 	Rotor_VIIT: {
 		notchPositions: []byte{'Y', 'C', 'F', 'K', 'R'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "BJVFTXPLNAYOZIKWGDQERUCHSM",
 	},
 	Rotor_VIIIT: {
 		notchPositions: []byte{'X', 'E', 'I', 'M', 'Q'},
-		canBeFourth:    false,
+		isThin:         false,
 		wiring:         "YMTPNZHWKODAJXELUQVGCBISFR",
 	},
 }

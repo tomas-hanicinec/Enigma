@@ -77,7 +77,7 @@ var reflectorDefinitions = map[ReflectorType]reflectorDefinition{
 		isRewirable: true,
 		isMovable:   false,
 		isThin:      false,
-		wiring:      "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		wiring:      "FOWULAQYSRTEZVBXGJIKDNCPHM", // corresponds to the wiring "AV BO CT DM EZ FN GX HQ IS KR LU PW"
 	},
 	UKW_T: {
 		isRewirable: false,

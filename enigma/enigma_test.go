@@ -325,7 +325,7 @@ func createEnigma(model Model, rotorConfigString string, reflectorConfigString s
 
 		slots := []RotorSlot{Fourth, Left, Middle, Right}
 		firstSlotIndex := 0
-		if model.GetRotorCount() == 3 {
+		if !model.HasRotorSlot(Fourth) {
 			firstSlotIndex = 1
 		}
 		for si, i := firstSlotIndex, 0; si < len(slots); si, i = si+1, i+1 {
