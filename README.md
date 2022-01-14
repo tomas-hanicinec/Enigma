@@ -1,13 +1,13 @@
 # Universal Enigma emulator
 
-Configurable library for emulating the Enigma cyphering machine. Basic usage:
+Configurable library for emulating the Enigma ciphering machine. Basic usage:
 
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/tomas-hanicinec/enigma/enigma"
+	"github.com/tomas-hanicinec/enigma"
 )
 
 func main() {
