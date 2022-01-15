@@ -63,7 +63,7 @@ func sortString(s string) string {
 
 // shift moves the given letter (specified by its index) byt the specified amount in the alphabet (Z wraps around back to A)
 // accepts both positive and negative numbers, and it's cyclical (Z wraps around back to A and A back to Z)
-func shift(input int, shiftBy int) int {
+func shift(input, shiftBy int) int {
 	result := (input + shiftBy) % Alphabet.getSize()
 	if result < 0 {
 		result = Alphabet.getSize() + result

@@ -314,7 +314,7 @@ func TestEnigma_EncodeAlphabet(t *testing.T) {
 	}
 }
 
-func createEnigma(model Model, rotorConfigString string, reflectorConfigString string, plugboardConfig string) (Enigma, error) {
+func createEnigma(model Model, rotorConfigString, reflectorConfigString, plugboardConfig string) (Enigma, error) {
 	// Rotors
 	rotorsConfig := make(map[RotorSlot]RotorConfig)
 	if rotorConfigString != "" {

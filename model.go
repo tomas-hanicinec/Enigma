@@ -27,6 +27,8 @@ func GetSupportedModels() []Model {
 		M3,
 		M4,
 		M4UKWD,
+		SwissK,
+		Tripitz,
 	}
 }
 
@@ -41,6 +43,10 @@ func (m Model) GetName() string {
 
 func (m Model) GetDescription() string {
 	return models[m].description
+}
+
+func (m Model) GetYear() int {
+	return models[m].yearIntroduced
 }
 
 func (m Model) getEtwWiring() etwWiring {
@@ -134,7 +140,6 @@ type modelDefinition struct {
 	yearIntroduced int
 	hasPlugboard   bool
 	hasFourthRotor bool
-	rotorSlots     []RotorSlot
 	reflectors     []ReflectorType
 	rotors         []RotorType
 	etw            etwWiring
@@ -147,8 +152,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1927,
 		hasPlugboard:   false,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UKW_K},
-		rotors:         []RotorType{Rotor_IK, Rotor_IIK, Rotor_IIIK},
+		reflectors:     []ReflectorType{UkwK},
+		rotors:         []RotorType{RotorIK, RotorIIK, RotorIIIK},
 		etw:            etwQwertz,
 	},
 	One: {
@@ -157,8 +162,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1932,
 		hasPlugboard:   true,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UKW_A, UKW_B},
-		rotors:         []RotorType{Rotor_I, Rotor_II, Rotor_III, Rotor_IV, Rotor_V},
+		reflectors:     []ReflectorType{UkwA, UkwB},
+		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV},
 		etw:            etwAbcdef,
 	},
 	M3: {
@@ -167,8 +172,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1934,
 		hasPlugboard:   true,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UKW_A, UKW_B, UKW_C, UKW_D},
-		rotors:         []RotorType{Rotor_I, Rotor_II, Rotor_III, Rotor_IV, Rotor_V, Rotor_VI, Rotor_VII, Rotor_VIII},
+		reflectors:     []ReflectorType{UkwA, UkwB, UkwC, UkwD},
+		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII},
 		etw:            etwAbcdef,
 	},
 	M4: {
@@ -177,8 +182,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1942,
 		hasPlugboard:   true,
 		hasFourthRotor: true,
-		reflectors:     []ReflectorType{UKW_BThin, UKW_CThin},
-		rotors:         []RotorType{Rotor_I, Rotor_II, Rotor_III, Rotor_IV, Rotor_V, Rotor_VI, Rotor_VII, Rotor_VIII, Rotor_beta, Rotor_gamma},
+		reflectors:     []ReflectorType{UkwBThin, UkwCThin},
+		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII, RotorBeta, RotorGamma},
 		etw:            etwAbcdef,
 	},
 	M4UKWD: {
@@ -187,8 +192,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1944,
 		hasPlugboard:   true,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UKW_D},
-		rotors:         []RotorType{Rotor_I, Rotor_II, Rotor_III, Rotor_IV, Rotor_V, Rotor_VI, Rotor_VII, Rotor_VIII},
+		reflectors:     []ReflectorType{UkwD},
+		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII},
 		etw:            etwAbcdef,
 	},
 	SwissK: {
@@ -197,8 +202,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1938,
 		hasPlugboard:   false,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UKW_K},
-		rotors:         []RotorType{Rotor_ISK, Rotor_IISK, Rotor_IIISK},
+		reflectors:     []ReflectorType{UkwK},
+		rotors:         []RotorType{RotorISK, RotorIISK, RotorIIISK},
 		etw:            etwQwertz,
 	},
 	Tripitz: {
@@ -207,8 +212,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1942,
 		hasPlugboard:   false,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UKW_T},
-		rotors:         []RotorType{Rotor_IT, Rotor_IIT, Rotor_IIIT, Rotor_IVT, Rotor_VT, Rotor_VIT, Rotor_VIIT, Rotor_VIIIT},
+		reflectors:     []ReflectorType{UkwT},
+		rotors:         []RotorType{RotorIT, RotorIIT, RotorIIIT, RotorIVT, RotorVT, RotorVIT, RotorVIIT, RotorVIIIT},
 		etw:            etwTripitz,
 	},
 }

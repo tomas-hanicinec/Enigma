@@ -102,17 +102,17 @@ e, err := enigma.NewEnigma(enigma.Commercial)
 // set up the rotors (we must already know the slots and available rotors for the current model)
 err = e.RotorsSetup(map[enigma.RotorSlot]enigma.RotorConfig{
     enigma.Right: {
-        RotorType:     enigma.Rotor_IK,
+        RotorType:     enigma.RotorIK,
         WheelPosition: 'C',
         RingPosition:  12,
     },
-    enigma.Middle: {enigma.Rotor_IIIK, 'Q', 10},  // one liner
-    enigma.Left:   {RotorType: enigma.Rotor_IIK}, // just the type set, rest is on default
+    enigma.Middle: {enigma.RotorIIIK, 'Q', 10},  // one liner
+    enigma.Left:   {RotorType: enigma.RotorIIK}, // just the type set, rest is on default
 })
 
 // set up the reflector
 err = e.ReflectorSetup(enigma.ReflectorConfig{
-    ReflectorType: enigma.UKW_B,
+    ReflectorType: enigma.UkwB,
     WheelPosition: 15, // Commercial Enigma had a movable reflector, so ok to set position
     Wiring:        "",
 })
@@ -123,12 +123,12 @@ When we want to create new Enigma with full-custom configuration from scratch.
 e, err := enigma.NewEnigmaWithSetup(
     enigma.M4,
     map[enigma.RotorSlot]enigma.RotorConfig{
-        enigma.Right:  {enigma.Rotor_I, 'W', 10},
-        enigma.Middle: {enigma.Rotor_II, 'D', 5},
-        enigma.Left:   {enigma.Rotor_III, 'A', 7},
-        enigma.Fourth: {enigma.Rotor_gamma, 'X', 5},
+        enigma.Right:  {enigma.RotorI, 'W', 10},
+        enigma.Middle: {enigma.RotorII, 'D', 5},
+        enigma.Left:   {enigma.RotorIII, 'A', 7},
+        enigma.Fourth: {enigma.Rotorgamma, 'X', 5},
     },
-    enigma.ReflectorConfig{ReflectorType: enigma.UKW_BThin},
+    enigma.ReflectorConfig{ReflectorType: enigma.UkwBThin},
     "AB CD EF",
 )
 ```

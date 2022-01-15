@@ -3,34 +3,34 @@ package enigma
 type RotorType string
 
 const (
-	Rotor_IK   RotorType = "I-K"
-	Rotor_IIK  RotorType = "II-K"
-	Rotor_IIIK RotorType = "III-K"
+	RotorIK   RotorType = "I-K"
+	RotorIIK  RotorType = "II-K"
+	RotorIIIK RotorType = "III-K"
 
-	Rotor_I    RotorType = "I"
-	Rotor_II   RotorType = "II"
-	Rotor_III  RotorType = "III"
-	Rotor_IV   RotorType = "IV"
-	Rotor_V    RotorType = "V"
-	Rotor_VI   RotorType = "VI"
-	Rotor_VII  RotorType = "VII"
-	Rotor_VIII RotorType = "VIII"
+	RotorI    RotorType = "I"
+	RotorII   RotorType = "II"
+	RotorIII  RotorType = "III"
+	RotorIV   RotorType = "IV"
+	RotorV    RotorType = "V"
+	RotorVI   RotorType = "VI"
+	RotorVII  RotorType = "VII"
+	RotorVIII RotorType = "VIII"
 
-	Rotor_beta  RotorType = "beta"
-	Rotor_gamma RotorType = "gamma"
+	RotorBeta  RotorType = "beta"
+	RotorGamma RotorType = "gamma"
 
-	Rotor_ISK   RotorType = "I-SK"
-	Rotor_IISK  RotorType = "II-SK"
-	Rotor_IIISK RotorType = "III-SK"
+	RotorISK   RotorType = "I-SK"
+	RotorIISK  RotorType = "II-SK"
+	RotorIIISK RotorType = "III-SK"
 
-	Rotor_IT    RotorType = "I-T"
-	Rotor_IIT   RotorType = "II-T"
-	Rotor_IIIT  RotorType = "III-T"
-	Rotor_IVT   RotorType = "IV-T"
-	Rotor_VT    RotorType = "V-T"
-	Rotor_VIT   RotorType = "VI-T"
-	Rotor_VIIT  RotorType = "VII-T"
-	Rotor_VIIIT RotorType = "VIII-T"
+	RotorIT    RotorType = "I-T"
+	RotorIIT   RotorType = "II-T"
+	RotorIIIT  RotorType = "III-T"
+	RotorIVT   RotorType = "IV-T"
+	RotorVT    RotorType = "V-T"
+	RotorVIT   RotorType = "VI-T"
+	RotorVIIT  RotorType = "VII-T"
+	RotorVIIIT RotorType = "VIII-T"
 )
 
 func (r RotorType) exists() bool {
@@ -57,126 +57,126 @@ type rotorDefinition struct {
 }
 
 var rotorDefinitions = map[RotorType]rotorDefinition{
-	Rotor_IK: {
+	RotorIK: {
 		notchPositions: []byte{'Y'},
 		isThin:         false,
 		wiring:         "LPGSZMHAEOQKVXRFYBUTNICJDW",
 	},
-	Rotor_IIK: {
+	RotorIIK: {
 		notchPositions: []byte{'E'},
 		isThin:         false,
 		wiring:         "SLVGBTFXJQOHEWIRZYAMKPCNDU",
 	},
-	Rotor_IIIK: {
+	RotorIIIK: {
 		notchPositions: []byte{'N'},
 		isThin:         false,
 		wiring:         "CJGDPSHKTURAWZXFMYNQOBVLIE",
 	},
 
-	Rotor_I: {
+	RotorI: {
 		notchPositions: []byte{'Q'},
 		isThin:         false,
 		wiring:         "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
 	},
-	Rotor_II: {
+	RotorII: {
 		notchPositions: []byte{'E'},
 		isThin:         false,
 		wiring:         "AJDKSIRUXBLHWTMCQGZNPYFVOE",
 	},
-	Rotor_III: {
+	RotorIII: {
 		notchPositions: []byte{'V'},
 		isThin:         false,
 		wiring:         "BDFHJLCPRTXVZNYEIWGAKMUSQO",
 	},
-	Rotor_IV: {
+	RotorIV: {
 		notchPositions: []byte{'J'},
 		isThin:         false,
 		wiring:         "ESOVPZJAYQUIRHXLNFTGKDCMWB",
 	},
-	Rotor_V: {
+	RotorV: {
 		notchPositions: []byte{'Z'},
 		isThin:         false,
 		wiring:         "VZBRGITYUPSDNHLXAWMJQOFECK",
 	},
-	Rotor_VI: {
+	RotorVI: {
 		notchPositions: []byte{'Z', 'M'},
 		isThin:         false,
 		wiring:         "JPGVOUMFYQBENHZRDKASXLICTW",
 	},
-	Rotor_VII: {
+	RotorVII: {
 		notchPositions: []byte{'Z', 'M'},
 		isThin:         false,
 		wiring:         "NZJHGRCXMYSWBOUFAIVLPEKQDT",
 	},
-	Rotor_VIII: {
+	RotorVIII: {
 		notchPositions: []byte{'Z', 'M'},
 		isThin:         false,
 		wiring:         "FKQHTLXOCBJSPDZRAMEWNIUYGV",
 	},
 
-	Rotor_beta: {
+	RotorBeta: {
 		notchPositions: []byte{},
 		isThin:         true,
 		wiring:         "LEYJVCNIXWPBQMDRTAKZGFUHOS",
 	},
-	Rotor_gamma: {
+	RotorGamma: {
 		notchPositions: []byte{},
 		isThin:         true,
 		wiring:         "FSOKANUERHMBTIYCWLQPZXVGJD",
 	},
 
-	Rotor_ISK: {
+	RotorISK: {
 		notchPositions: []byte{'Y'},
 		isThin:         false,
 		wiring:         "PEZUOHXSCVFMTBGLRINQJWAYDK",
 	},
-	Rotor_IISK: {
+	RotorIISK: {
 		notchPositions: []byte{'E'},
 		isThin:         false,
 		wiring:         "ZOUESYDKFWPCIQXHMVBLGNJRAT",
 	},
-	Rotor_IIISK: {
+	RotorIIISK: {
 		notchPositions: []byte{'N'},
 		isThin:         false,
 		wiring:         "EHRVXGAOBQUSIMZFLYNWKTPDJC",
 	},
 
-	Rotor_IT: {
+	RotorIT: {
 		notchPositions: []byte{'W', 'Z', 'E', 'K', 'Q'},
 		isThin:         false,
 		wiring:         "KPTYUELOCVGRFQDANJMBSWHZXI",
 	},
-	Rotor_IIT: {
+	RotorIIT: {
 		notchPositions: []byte{'W', 'Z', 'F', 'L', 'R'},
 		isThin:         false,
 		wiring:         "UPHZLWEQMTDJXCAKSOIGVBYFNR",
 	},
-	Rotor_IIIT: {
+	RotorIIIT: {
 		notchPositions: []byte{'W', 'Z', 'E', 'K', 'Q'},
 		isThin:         false,
 		wiring:         "QUDLYRFEKONVZAXWHMGPJBSICT",
 	},
-	Rotor_IVT: {
+	RotorIVT: {
 		notchPositions: []byte{'W', 'Z', 'F', 'L', 'R'},
 		isThin:         false,
 		wiring:         "CIWTBKXNRESPFLYDAGVHQUOJZM",
 	},
-	Rotor_VT: {
+	RotorVT: {
 		notchPositions: []byte{'Y', 'C', 'F', 'K', 'R'},
 		isThin:         false,
 		wiring:         "UAXGISNJBVERDYLFZWTPCKOHMQ",
 	},
-	Rotor_VIT: {
+	RotorVIT: {
 		notchPositions: []byte{'X', 'E', 'I', 'M', 'Q'},
 		isThin:         false,
 		wiring:         "XFUZGALVHCNYSEWQTDMRBKPIOJ",
 	},
-	Rotor_VIIT: {
+	RotorVIIT: {
 		notchPositions: []byte{'Y', 'C', 'F', 'K', 'R'},
 		isThin:         false,
 		wiring:         "BJVFTXPLNAYOZIKWGDQERUCHSM",
 	},
-	Rotor_VIIIT: {
+	RotorVIIIT: {
 		notchPositions: []byte{'X', 'E', 'I', 'M', 'Q'},
 		isThin:         false,
 		wiring:         "YMTPNZHWKODAJXELUQVGCBISFR",

@@ -92,9 +92,8 @@ func (r *reflector) setWiring(wiring string) error {
 			if mapped, ok := wiringMap[letters[i]]; ok && mapped != letters[i] {
 				if pair[i] == 'Y' || pair[i] == 'J' {
 					return fmt.Errorf("invalid pair %s, letters Y and J are hard-wired in UKW-D reflectors and cannot be changed", pair)
-				} else {
-					return fmt.Errorf("invalid pair %s, letter %s already wired", pair, string(pair[i]))
 				}
+				return fmt.Errorf("invalid pair %s, letter %s already wired", pair, string(pair[i]))
 			}
 		}
 

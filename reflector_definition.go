@@ -3,14 +3,14 @@ package enigma
 type ReflectorType string
 
 const (
-	UKW_K     ReflectorType = "K"
-	UKW_A     ReflectorType = "A"
-	UKW_B     ReflectorType = "B"
-	UKW_C     ReflectorType = "C"
-	UKW_BThin ReflectorType = "BThin"
-	UKW_CThin ReflectorType = "CThin"
-	UKW_D     ReflectorType = "D"
-	UKW_T     ReflectorType = "T"
+	UkwK     ReflectorType = "K"
+	UkwA     ReflectorType = "A"
+	UkwB     ReflectorType = "B"
+	UkwC     ReflectorType = "C"
+	UkwBThin ReflectorType = "BThin"
+	UkwCThin ReflectorType = "CThin"
+	UkwD     ReflectorType = "D"
+	UkwT     ReflectorType = "T"
 )
 
 func (r ReflectorType) IsRewirable() bool {
@@ -37,49 +37,49 @@ type reflectorDefinition struct {
 }
 
 var reflectorDefinitions = map[ReflectorType]reflectorDefinition{
-	UKW_K: {
+	UkwK: {
 		isRewirable: false,
 		isMovable:   true,
 		isThin:      false,
 		wiring:      "IMETCGFRAYSQBZXWLHKDVUPOJN",
 	},
-	UKW_A: {
+	UkwA: {
 		isRewirable: false,
 		isMovable:   false,
 		isThin:      false,
 		wiring:      "EJMZALYXVBWFCRQUONTSPIKHGD",
 	},
-	UKW_B: {
+	UkwB: {
 		isRewirable: false,
 		isMovable:   false,
 		isThin:      false,
 		wiring:      "YRUHQSLDPXNGOKMIEBFZCWVJAT",
 	},
-	UKW_C: {
+	UkwC: {
 		isRewirable: false,
 		isMovable:   false,
 		isThin:      false,
 		wiring:      "FVPJIAOYEDRZXWGCTKUQSBNMHL",
 	},
-	UKW_BThin: {
+	UkwBThin: {
 		isRewirable: false,
 		isMovable:   false,
 		isThin:      true,
 		wiring:      "ENKQAUYWJICOPBLMDXZVFTHRGS",
 	},
-	UKW_CThin: {
+	UkwCThin: {
 		isRewirable: false,
 		isMovable:   false,
 		isThin:      true,
 		wiring:      "RDOBJNTKVEHMLFCWZAXGYIPSUQ",
 	},
-	UKW_D: {
+	UkwD: {
 		isRewirable: true,
 		isMovable:   false,
 		isThin:      false,
 		wiring:      "FOWULAQYSRTEZVBXGJIKDNCPHM", // corresponds to the wiring "AV BO CT DM EZ FN GX HQ IS KR LU PW"
 	},
-	UKW_T: {
+	UkwT: {
 		isRewirable: false,
 		isMovable:   false,
 		isThin:      false,
