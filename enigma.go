@@ -16,6 +16,7 @@ type Enigma struct {
 // RotorSlot represents the slot for the rotor. Most Enigmas had three
 type RotorSlot int
 
+// all available rotor slots
 const (
 	Right  RotorSlot = 0
 	Middle RotorSlot = 1
