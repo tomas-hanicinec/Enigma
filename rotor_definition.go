@@ -1,52 +1,56 @@
 package enigma
 
-type RotorType string
+// RotorModel specifies the type of rotor (different Enigma models supported different sets of rotors)
+type RotorModel string
 
+// all supported rotor models
 const (
-	RotorIK   RotorType = "I-K"
-	RotorIIK  RotorType = "II-K"
-	RotorIIIK RotorType = "III-K"
+	RotorIK   RotorModel = "I-K"
+	RotorIIK  RotorModel = "II-K"
+	RotorIIIK RotorModel = "III-K"
 
-	RotorI    RotorType = "I"
-	RotorII   RotorType = "II"
-	RotorIII  RotorType = "III"
-	RotorIV   RotorType = "IV"
-	RotorV    RotorType = "V"
-	RotorVI   RotorType = "VI"
-	RotorVII  RotorType = "VII"
-	RotorVIII RotorType = "VIII"
+	RotorI    RotorModel = "I"
+	RotorII   RotorModel = "II"
+	RotorIII  RotorModel = "III"
+	RotorIV   RotorModel = "IV"
+	RotorV    RotorModel = "V"
+	RotorVI   RotorModel = "VI"
+	RotorVII  RotorModel = "VII"
+	RotorVIII RotorModel = "VIII"
 
-	RotorBeta  RotorType = "beta"
-	RotorGamma RotorType = "gamma"
+	RotorBeta  RotorModel = "beta"
+	RotorGamma RotorModel = "gamma"
 
-	RotorISK   RotorType = "I-SK"
-	RotorIISK  RotorType = "II-SK"
-	RotorIIISK RotorType = "III-SK"
+	RotorISK   RotorModel = "I-SK"
+	RotorIISK  RotorModel = "II-SK"
+	RotorIIISK RotorModel = "III-SK"
 
-	RotorIT    RotorType = "I-T"
-	RotorIIT   RotorType = "II-T"
-	RotorIIIT  RotorType = "III-T"
-	RotorIVT   RotorType = "IV-T"
-	RotorVT    RotorType = "V-T"
-	RotorVIT   RotorType = "VI-T"
-	RotorVIIT  RotorType = "VII-T"
-	RotorVIIIT RotorType = "VIII-T"
+	RotorIT    RotorModel = "I-T"
+	RotorIIT   RotorModel = "II-T"
+	RotorIIIT  RotorModel = "III-T"
+	RotorIVT   RotorModel = "IV-T"
+	RotorVT    RotorModel = "V-T"
+	RotorVIT   RotorModel = "VI-T"
+	RotorVIIT  RotorModel = "VII-T"
+	RotorVIIIT RotorModel = "VIII-T"
 )
 
-func (r RotorType) exists() bool {
+func (r RotorModel) exists() bool {
 	_, ok := rotorDefinitions[r]
 	return ok
 }
 
-func (r RotorType) getNotchPositions() []byte {
+func (r RotorModel) getNotchPositions() []byte {
 	return rotorDefinitions[r].notchPositions
 }
 
-func (r RotorType) IsThin() bool {
+// IsThin determines if this rotor model is thin or normal size,
+// only thin rotors can be placed into the last slot of 4-rotor Enigma models
+func (r RotorModel) IsThin() bool {
 	return rotorDefinitions[r].isThin
 }
 
-func (r RotorType) getWiring() string {
+func (r RotorModel) getWiring() string {
 	return rotorDefinitions[r].wiring
 }
 
@@ -56,7 +60,7 @@ type rotorDefinition struct {
 	wiring         string
 }
 
-var rotorDefinitions = map[RotorType]rotorDefinition{
+var rotorDefinitions = map[RotorModel]rotorDefinition{
 	RotorIK: {
 		notchPositions: []byte{'Y'},
 		isThin:         false,

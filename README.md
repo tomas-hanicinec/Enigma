@@ -33,7 +33,7 @@ Supports all mainstream Enigma models, most notably German military models **I**
 Full list of supported models along with their names, descriptions, design ect can be acquired as follows
 ```go
 for _, model := range enigma.GetSupportedModels() {
-	fmt.Printf("%s: %s\n", model.GetName(), model.GetDescription())
+    fmt.Printf("%s: %s\n", model.GetName(), model.GetDescription())
 }
 ```
 
@@ -59,33 +59,33 @@ When we already have a working Enigma model and want to tweak it (ie. when tryin
 ```go
 e, err := enigma.NewEnigma(enigma.M4)
 
-//select rotor types and put them into available slots
-placedRotorTypes := map[enigma.RotorType]struct{}{} // cannot use the same rotor type twice
-rotorTypes := map[enigma.RotorSlot]enigma.RotorType{}
+//select rotor models and put them into available slots
+placedRotorModels := map[enigma.RotorModel]struct{}{} // cannot use the same rotor model twice
+rotorModels := map[enigma.RotorSlot]enigma.RotorModel{}
 for _, slot := range e.GetAvailableRotorSlots() {
-	for _, availableType := range e.GetAvailableRotors(slot) {
-		if _, ok := placedRotorTypes[availableType]; !ok {
-			rotorTypes[slot] = availableType // use the first available unused
-			placedRotorTypes[availableType] = struct{}{}
-			break
+    for _, availableModel := range e.GetAvailableRotorModels(slot) {
+        if _, ok := placedRotorModels[availableModel]; !ok {
+            rotorModels[slot] = availableModel // use the first available unused rotor model
+            placedRotorModels[availableModel] = struct{}{}
+            break
 		}
-	}
+    }
 }
-err = e.RotorsSelect(rotorTypes) // rotor types can only be set all at once
+err = e.RotorsSelect(rotorModels) // rotor models can only be set all at once
 
 // now adjust the middle rotor
 err = e.RotorSetWheel(enigma.Middle, 'X') // allowed rotor wheel positions: A-Z
 err = e.RotorSetRing(enigma.Middle, 5)    // allowed rotor ring positions: 1-26
 
 // reflector changes
-reflectors := e.GetAvailableReflectors()
+reflectors := e.GetAvailableReflectorModels()
 err = e.ReflectorSelect(reflectors[0]) // select supported reflector
-if e.GetReflectorType().IsMovable() {
-    // this means the reflector can be rotated 
-	err = e.ReflectorSetWheel(15) // allowed reflector wheel positions: 1-26
-} else if e.GetReflectorType().IsRewirable() {
-	// UKW-D rewirable reflector (about the configuration format see the note bellow)
-	err = e.ReflectorRewire("AV BO CT DM EZ FN GX HQ IS KR LU PW") 
+if e.GetReflectorModel().IsMovable() {
+    // this means the reflector can be rotated
+    err = e.ReflectorSetWheel(15) // allowed reflector wheel positions: 1-26
+} else if e.GetReflectorModel().IsRewirable() {
+    // UKW-D rewirable reflector (about the configuration format see the note bellow)
+    err = e.ReflectorRewire("AV BO CT DM EZ FN GX HQ IS KR LU PW")
 }
 
 if e.HasPlugboard() {
@@ -102,17 +102,17 @@ e, err := enigma.NewEnigma(enigma.Commercial)
 // set up the rotors (we must already know the slots and available rotors for the current model)
 err = e.RotorsSetup(map[enigma.RotorSlot]enigma.RotorConfig{
     enigma.Right: {
-        RotorType:     enigma.RotorIK,
+        Model:         enigma.RotorIK,
         WheelPosition: 'C',
         RingPosition:  12,
     },
-    enigma.Middle: {enigma.RotorIIIK, 'Q', 10},  // one liner
-    enigma.Left:   {RotorType: enigma.RotorIIK}, // just the type set, rest is on default
+    enigma.Middle: {enigma.RotorIIIK, 'Q', 10}, // one liner
+    enigma.Left:   {Model: enigma.RotorIIK},    // just model set, rest is on default
 })
 
 // set up the reflector
 err = e.ReflectorSetup(enigma.ReflectorConfig{
-    ReflectorType: enigma.UkwB,
+    Model:         enigma.UkwB,
     WheelPosition: 15, // Commercial Enigma had a movable reflector, so ok to set position
     Wiring:        "",
 })
@@ -126,9 +126,9 @@ e, err := enigma.NewEnigmaWithSetup(
         enigma.Right:  {enigma.RotorI, 'W', 10},
         enigma.Middle: {enigma.RotorII, 'D', 5},
         enigma.Left:   {enigma.RotorIII, 'A', 7},
-        enigma.Fourth: {enigma.Rotorgamma, 'X', 5},
+        enigma.Fourth: {enigma.RotorGamma, 'X', 5},
     },
-    enigma.ReflectorConfig{ReflectorType: enigma.UkwBThin},
+    enigma.ReflectorConfig{Model: enigma.UkwBThin},
     "AB CD EF",
 )
 ```

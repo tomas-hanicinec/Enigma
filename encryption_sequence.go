@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// EncryptionSequence contains detailed information about encryption process of a single letter,
+// can be used for debugging via Enigma.EncodeVerbose
 type EncryptionSequence struct {
 	rotorPositions []int
 	in             int
@@ -37,10 +39,12 @@ func (es *EncryptionSequence) finish(encodedLetter int) {
 	es.out = encodedLetter
 }
 
+// GetResult returns the final encrypted letter
 func (es *EncryptionSequence) GetResult() byte {
 	return Alphabet.intToChar(es.out)
 }
 
+// Format returns human-readable string representation of the sequence
 func (es *EncryptionSequence) Format() string {
 	separator := "---------------------------------\n"
 	positions := make([]string, len(es.rotorPositions))

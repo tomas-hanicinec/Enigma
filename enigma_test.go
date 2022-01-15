@@ -197,7 +197,7 @@ func TestEnigma_ConfigurationError(t *testing.T) {
 			spec: enigmaSpec{M4, "V I II III | |", "", ""},
 		},
 		{
-			name: "duplicate rotor type",
+			name: "duplicate rotor model",
 			spec: enigmaSpec{M3, "I II II | |", "", ""},
 		},
 		{
@@ -319,7 +319,7 @@ func createEnigma(model Model, rotorConfigString, reflectorConfigString, plugboa
 	rotorsConfig := make(map[RotorSlot]RotorConfig)
 	if rotorConfigString != "" {
 		conf := strings.Split(rotorConfigString, "|")
-		rotorTypes := parseConfig(conf[0])
+		rotorModels := parseConfig(conf[0])
 		wheelPositions := parseConfig(conf[1])
 		ringPositions := parseConfig(conf[2])
 
@@ -330,8 +330,8 @@ func createEnigma(model Model, rotorConfigString, reflectorConfigString, plugboa
 		}
 		for si, i := firstSlotIndex, 0; si < len(slots); si, i = si+1, i+1 {
 			config := RotorConfig{}
-			if rotorTypes != nil {
-				config.RotorType = RotorType(rotorTypes[i])
+			if rotorModels != nil {
+				config.Model = RotorModel(rotorModels[i])
 			}
 			if wheelPositions != nil {
 				config.WheelPosition = wheelPositions[i][0]
@@ -347,9 +347,9 @@ func createEnigma(model Model, rotorConfigString, reflectorConfigString, plugboa
 	reflectorConfig := ReflectorConfig{}
 	if reflectorConfigString != "" {
 		conf := strings.Split(reflectorConfigString, "|")
-		refType := ReflectorType(strings.TrimSpace(conf[0]))
-		if refType != "" {
-			reflectorConfig.ReflectorType = refType
+		refModel := ReflectorModel(strings.TrimSpace(conf[0]))
+		if refModel != "" {
+			reflectorConfig.Model = refModel
 		}
 		refPosition := strings.TrimSpace(conf[1])
 		if refPosition != "" {

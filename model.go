@@ -8,8 +8,10 @@ const (
 	etwTripitz = "KZROUQHYAIGBLWVSTDXFPNMCJE"
 )
 
+// Model specifies the Enigma machine model
 type Model string
 
+// all supported Enigma models
 const (
 	Commercial Model = "Commercial"
 	One        Model = "I"
@@ -20,6 +22,7 @@ const (
 	Tripitz    Model = "Tripitz"
 )
 
+// GetSupportedModels returns all the supported Enigma models
 func GetSupportedModels() []Model {
 	return []Model{
 		SwissK,
@@ -37,14 +40,17 @@ func (m Model) exists() bool {
 	return ok
 }
 
+// GetName returns full name of this model
 func (m Model) GetName() string {
 	return models[m].name
 }
 
+// GetDescription returns brief description of this model
 func (m Model) GetDescription() string {
 	return models[m].description
 }
 
+// GetYear returns the year in which this model was first introduced
 func (m Model) GetYear() int {
 	return models[m].yearIntroduced
 }
@@ -53,10 +59,12 @@ func (m Model) getEtwWiring() etwWiring {
 	return models[m].etw
 }
 
+// HasPlugboard shows if this model has a rewirable plugboard (not all Enigma models had that)
 func (m Model) HasPlugboard() bool {
 	return models[m].hasPlugboard
 }
 
+// GetAvailableRotorSlots returns all the rotor slots available in this model
 func (m Model) GetAvailableRotorSlots() []RotorSlot {
 	// it is important that the slots are ordered right to left as this is the order the current flows through
 	if models[m].hasFourthRotor {
@@ -65,6 +73,7 @@ func (m Model) GetAvailableRotorSlots() []RotorSlot {
 	return []RotorSlot{Right, Middle, Left}
 }
 
+// HasRotorSlot determines if the given rotor slot was present in this Enigma model
 func (m Model) HasRotorSlot(slot RotorSlot) bool {
 	for _, supportedSlot := range m.GetAvailableRotorSlots() {
 		if supportedSlot == slot {
@@ -74,15 +83,16 @@ func (m Model) HasRotorSlot(slot RotorSlot) bool {
 	return false
 }
 
-func (m Model) GetAvailableRotors(slot RotorSlot) []RotorType {
+// GetAvailableRotorModels returns the supported rotor set for this Enigma model
+func (m Model) GetAvailableRotorModels(slot RotorSlot) []RotorModel {
 	allAvailable := models[m].rotors
-	normal := make([]RotorType, 0, len(allAvailable))
-	thin := make([]RotorType, 0)
-	for _, rotorType := range allAvailable {
-		if rotorType.IsThin() {
-			thin = append(thin, rotorType)
+	normal := make([]RotorModel, 0, len(allAvailable))
+	thin := make([]RotorModel, 0)
+	for _, rotorModel := range allAvailable {
+		if rotorModel.IsThin() {
+			thin = append(thin, rotorModel)
 		} else {
-			normal = append(normal, rotorType)
+			normal = append(normal, rotorModel)
 		}
 	}
 
@@ -92,23 +102,23 @@ func (m Model) GetAvailableRotors(slot RotorSlot) []RotorType {
 	return normal
 }
 
-func (m Model) supportsRotorType(rotorType RotorType, slot RotorSlot) bool {
-	for _, rot := range m.GetAvailableRotors(slot) {
-		if rot == rotorType {
+func (m Model) supportsRotorModel(rotorModel RotorModel, slot RotorSlot) bool {
+	for _, rot := range m.GetAvailableRotorModels(slot) {
+		if rot == rotorModel {
 			return true
 		}
 	}
 	return false
 }
 
-func (m Model) getDefaultRotorTypes() map[RotorSlot]RotorType {
-	placedTypes := map[RotorType]struct{}{} // cannot use the same rotor type twice
-	result := map[RotorSlot]RotorType{}
+func (m Model) getDefaultRotorModels() map[RotorSlot]RotorModel {
+	placedModels := map[RotorModel]struct{}{} // cannot use the same rotor model twice
+	result := map[RotorSlot]RotorModel{}
 	for _, slot := range m.GetAvailableRotorSlots() {
-		for _, availableType := range m.GetAvailableRotors(slot) {
-			if _, ok := placedTypes[availableType]; !ok {
-				result[slot] = availableType // use the first available unused rotor type
-				placedTypes[availableType] = struct{}{}
+		for _, availableModel := range m.GetAvailableRotorModels(slot) {
+			if _, ok := placedModels[availableModel]; !ok {
+				result[slot] = availableModel // use the first available unused rotor model
+				placedModels[availableModel] = struct{}{}
 				break
 			}
 		}
@@ -117,20 +127,21 @@ func (m Model) getDefaultRotorTypes() map[RotorSlot]RotorType {
 	return result
 }
 
-func (m Model) GetAvailableReflectors() []ReflectorType {
+// GetAvailableReflectorModels return all the reflectors that can be plugged into this Enigma model
+func (m Model) GetAvailableReflectorModels() []ReflectorModel {
 	return models[m].reflectors
 }
 
-func (m Model) supportsReflectorType(reflectorType ReflectorType) bool {
-	for _, ref := range m.GetAvailableReflectors() {
-		if ref == reflectorType {
+func (m Model) supportsReflectorModel(reflectorModel ReflectorModel) bool {
+	for _, ref := range m.GetAvailableReflectorModels() {
+		if ref == reflectorModel {
 			return true
 		}
 	}
 	return false
 }
 
-func (m Model) getDefaultReflectorType() ReflectorType {
+func (m Model) getDefaultReflectorModel() ReflectorModel {
 	return models[m].reflectors[0]
 }
 
@@ -140,8 +151,8 @@ type modelDefinition struct {
 	yearIntroduced int
 	hasPlugboard   bool
 	hasFourthRotor bool
-	reflectors     []ReflectorType
-	rotors         []RotorType
+	reflectors     []ReflectorModel
+	rotors         []RotorModel
 	etw            etwWiring
 }
 
@@ -152,8 +163,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1927,
 		hasPlugboard:   false,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UkwK},
-		rotors:         []RotorType{RotorIK, RotorIIK, RotorIIIK},
+		reflectors:     []ReflectorModel{UkwK},
+		rotors:         []RotorModel{RotorIK, RotorIIK, RotorIIIK},
 		etw:            etwQwertz,
 	},
 	One: {
@@ -162,8 +173,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1932,
 		hasPlugboard:   true,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UkwA, UkwB},
-		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV},
+		reflectors:     []ReflectorModel{UkwA, UkwB},
+		rotors:         []RotorModel{RotorI, RotorII, RotorIII, RotorIV, RotorV},
 		etw:            etwAbcdef,
 	},
 	M3: {
@@ -172,8 +183,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1934,
 		hasPlugboard:   true,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UkwA, UkwB, UkwC, UkwD},
-		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII},
+		reflectors:     []ReflectorModel{UkwA, UkwB, UkwC, UkwD},
+		rotors:         []RotorModel{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII},
 		etw:            etwAbcdef,
 	},
 	M4: {
@@ -182,8 +193,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1942,
 		hasPlugboard:   true,
 		hasFourthRotor: true,
-		reflectors:     []ReflectorType{UkwBThin, UkwCThin},
-		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII, RotorBeta, RotorGamma},
+		reflectors:     []ReflectorModel{UkwBThin, UkwCThin},
+		rotors:         []RotorModel{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII, RotorBeta, RotorGamma},
 		etw:            etwAbcdef,
 	},
 	M4UKWD: {
@@ -192,8 +203,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1944,
 		hasPlugboard:   true,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UkwD},
-		rotors:         []RotorType{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII},
+		reflectors:     []ReflectorModel{UkwD},
+		rotors:         []RotorModel{RotorI, RotorII, RotorIII, RotorIV, RotorV, RotorVI, RotorVII, RotorVIII},
 		etw:            etwAbcdef,
 	},
 	SwissK: {
@@ -202,8 +213,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1938,
 		hasPlugboard:   false,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UkwK},
-		rotors:         []RotorType{RotorISK, RotorIISK, RotorIIISK},
+		reflectors:     []ReflectorModel{UkwK},
+		rotors:         []RotorModel{RotorISK, RotorIISK, RotorIIISK},
 		etw:            etwQwertz,
 	},
 	Tripitz: {
@@ -212,8 +223,8 @@ var models = map[Model]modelDefinition{
 		yearIntroduced: 1942,
 		hasPlugboard:   false,
 		hasFourthRotor: false,
-		reflectors:     []ReflectorType{UkwT},
-		rotors:         []RotorType{RotorIT, RotorIIT, RotorIIIT, RotorIVT, RotorVT, RotorVIT, RotorVIIT, RotorVIIIT},
+		reflectors:     []ReflectorModel{UkwT},
+		rotors:         []RotorModel{RotorIT, RotorIIT, RotorIIIT, RotorIVT, RotorVT, RotorVIT, RotorVIIT, RotorVIIIT},
 		etw:            etwTripitz,
 	},
 }

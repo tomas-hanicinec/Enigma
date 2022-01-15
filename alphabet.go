@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Alphabet is a basic alphabet for all Enigma encodings
 var Alphabet = newAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 type alphabet struct {
@@ -99,6 +100,8 @@ var substitutions = []struct {
 	{"-", "YY"},
 }
 
+// Preprocess prepares the given text for Enigma encryption.
+// Unifies the text case and handles some common unsupported characters
 func Preprocess(text string) string {
 	text = strings.ToUpper(text) // convert to uppercase
 	// replace punctuations with double letters
@@ -109,6 +112,7 @@ func Preprocess(text string) string {
 	return text
 }
 
+// Postprocess converts preprocessed text back to readable format (complementary to Preprocess)
 func Postprocess(text string) string {
 	// convert the punctuations back
 	for i := len(substitutions) - 1; i >= 0; i-- {

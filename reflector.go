@@ -5,24 +5,25 @@ import (
 	"strings"
 )
 
+// ReflectorConfig contains full configuration of a reflector
 type ReflectorConfig struct {
-	ReflectorType ReflectorType
+	Model         ReflectorModel
 	WheelPosition byte
 	Wiring        string
 }
 
 func (r ReflectorConfig) isEmpty() bool {
-	return r.ReflectorType == "" && r.WheelPosition == 0 && r.Wiring == ""
+	return r.Model == "" && r.WheelPosition == 0 && r.Wiring == ""
 }
 
 type reflector struct {
-	reflectorType ReflectorType
+	model         ReflectorModel
 	letterMap     map[int]int
 	wheelPosition int
 }
 
-func newReflector(reflectorType ReflectorType) reflector {
-	wiring := reflectorType.getWiring()
+func newReflector(model ReflectorModel) reflector {
+	wiring := model.getWiring()
 	if !Alphabet.isValidWiring(wiring) {
 		panic(fmt.Errorf("invalid reflector wiring %s", wiring))
 	}
@@ -38,15 +39,15 @@ func newReflector(reflectorType ReflectorType) reflector {
 	}
 
 	return reflector{
-		reflectorType: reflectorType,
+		model:         model,
 		letterMap:     letterMap,
 		wheelPosition: 0,
 	}
 }
 
 func (r *reflector) setWheelPosition(letter byte) error {
-	if !r.reflectorType.IsMovable() {
-		return fmt.Errorf("reflector %s is fixed, cannot change position", r.reflectorType)
+	if !r.model.IsMovable() {
+		return fmt.Errorf("reflector %s is fixed, cannot change position", r.model)
 	}
 	index, ok := Alphabet.charToInt(letter)
 	if !ok {
@@ -58,8 +59,8 @@ func (r *reflector) setWheelPosition(letter byte) error {
 }
 
 func (r *reflector) setWiring(wiring string) error {
-	if !r.reflectorType.IsRewirable() {
-		return fmt.Errorf("reflector %s is not rewirable, cannot change wiring", r.reflectorType)
+	if !r.model.IsRewirable() {
+		return fmt.Errorf("reflector %s is not rewirable, cannot change wiring", r.model)
 	}
 
 	// UKW-D rewirable reflectors had different letter order (JY were always connected, the rest 12 pairs were configurable)

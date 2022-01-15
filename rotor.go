@@ -4,14 +4,15 @@ import (
 	"fmt"
 )
 
+// RotorConfig contains full configuration of a rotor
 type RotorConfig = struct {
-	RotorType     RotorType
+	Model         RotorModel
 	WheelPosition byte
 	RingPosition  int
 }
 
 type rotor struct {
-	rotorType            RotorType
+	model                RotorModel
 	wiringMapIn          map[int]int // In = first pass through the rotors (from the plugboard to the reflector)
 	wiringMapOut         map[int]int // Out = second pass (from the reflector to the plugboard)
 	notchPositions       []int
@@ -20,16 +21,16 @@ type rotor struct {
 	ringPosition         int
 }
 
-func newRotor(rotorType RotorType) rotor {
-	if !rotorType.exists() {
-		panic(fmt.Errorf("invalid rotor type"))
+func newRotor(rotorModel RotorModel) rotor {
+	if !rotorModel.exists() {
+		panic(fmt.Errorf("unsupported rotor model"))
 	}
-	wiring := rotorType.getWiring()
+	wiring := rotorModel.getWiring()
 	if !Alphabet.isValidWiring(wiring) {
 		panic(fmt.Errorf("invalid rotor wiring %s", wiring))
 	}
-	notchPositions := make([]int, len(rotorType.getNotchPositions()))
-	for i, notchPositionByte := range rotorType.getNotchPositions() {
+	notchPositions := make([]int, len(rotorModel.getNotchPositions()))
+	for i, notchPositionByte := range rotorModel.getNotchPositions() {
 		notchPositionInt, ok := Alphabet.charToInt(notchPositionByte)
 		if !ok {
 			panic(fmt.Errorf("invalid notch position %s", string(notchPositionByte)))
@@ -49,7 +50,7 @@ func newRotor(rotorType RotorType) rotor {
 	}
 
 	return rotor{
-		rotorType:            rotorType,
+		model:                rotorModel,
 		wiringMapIn:          in,
 		wiringMapOut:         out,
 		notchPositions:       notchPositions,
@@ -83,7 +84,7 @@ func (r *rotor) setRingPosition(position int) error {
 
 func (r *rotor) reset() {
 	if err := r.setWheelPosition(r.initialWheelPosition); err != nil {
-		panic(fmt.Errorf("failed to reset rotor %s: %w", r.rotorType, err))
+		panic(fmt.Errorf("failed to reset rotor %s: %w", r.model, err))
 	}
 }
 
